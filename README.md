@@ -2,37 +2,43 @@
 
 **The Keeper of the Citadel.**
 
-Autonomous keeper agent for Arcis Protocol. Harvests yield, monitors health, services debt, answers community questions, and reports protocol status — all without human intervention.
+Autonomous keeper and community agent for Arcis Protocol. 9 skills. Harvests yield, monitors health, services debt, engages community, posts insights, and narrates protocol operations.
 
 ---
 
-## Skills
+## Keeper Skills
 
-**VaultKeeper** (5 min) — harvest yield, TVL monitoring, invariant checks
+| Skill | Interval | What It Does |
+|---|---|---|
+| VaultKeeper | 5 min | harvest, rebalance, TVL monitoring, invariant checks |
+| CreditKeeper | 1 min | loan scanning, liquidation, utilization alerts |
+| BondKeeper | 10 min | serviceDebt, depositPrincipal, default detection |
+| StatusReporter | 1 hour | aggregated multi-skill protocol summary |
 
-**CreditKeeper** (1 min) — loan scanning, liquidation, utilization alerts
+## Social Skills
 
-**BondKeeper** (10 min) — serviceDebt, depositPrincipal, default alerts
-
-**StatusReporter** (1 hour) — aggregated protocol summary to Telegram
+| Skill | Interval | What It Does |
+|---|---|---|
+| TelegramSkill | 2 sec | interactive bot — commands, natural language, live data |
+| XSkill | 4 hours | scheduled posts — status updates and thesis commentary |
+| NarratorSkill | 30 sec | real-time keeper action narration across channels |
+| InsightSkill | 1 hour | data-driven protocol insights, educational content |
+| EngagementSkill | 10 min | TVL milestones, ATH tracking, daily briefings |
 
 ---
 
-## Social
+## Telegram Commands
 
-**Telegram Bot** — interactive community agent. Responds to commands and natural language.
+```
+/status   Full protocol overview
+/vault    TVL, exchange rate, capacity
+/credit   Lending pool, utilization
+/bonds    Revenue bond status
+/ati      Agent Treasury Interface spec
+/help     Command list
+```
 
-| Command | Response |
-|---|---|
-| /status | Full protocol overview |
-| /vault | TVL, exchange rate, capacity |
-| /credit | Lending pool, utilization |
-| /bonds | Revenue bond status |
-| /ati | Agent Treasury Interface spec |
-| "what is arcis" | Protocol description |
-| "gm" | Keeper greeting |
-
-**X/Twitter** — scheduled posts alternating between protocol status updates and thesis commentary. Terse, institutional, never promotional.
+Natural language: ask about TVL, rates, loans, what Arcis is, or say gm.
 
 ---
 
@@ -48,25 +54,19 @@ cd custos && npm install
 npx tsx src/index.ts
 ```
 
-**Full keeper + Telegram bot:**
+**Full keeper + all social:**
 ```bash
 CUSTOS_PRIVATE_KEY=0x... \
-TELEGRAM_BOT_TOKEN=your_bot_token \
-TELEGRAM_CHAT_ID=your_chat_id \
+TELEGRAM_BOT_TOKEN=... \
+TELEGRAM_CHAT_ID=... \
+X_API_KEY=... \
+X_API_SECRET=... \
+X_ACCESS_TOKEN=... \
+X_ACCESS_SECRET=... \
 npx tsx src/index.ts
 ```
 
-**Full keeper + Telegram + X:**
-```bash
-CUSTOS_PRIVATE_KEY=0x... \
-TELEGRAM_BOT_TOKEN=your_bot_token \
-TELEGRAM_CHAT_ID=your_chat_id \
-X_API_KEY=your_key \
-X_API_SECRET=your_secret \
-X_ACCESS_TOKEN=your_token \
-X_ACCESS_SECRET=your_token_secret \
-npx tsx src/index.ts
-```
+Missing credentials disable individual skills gracefully.
 
 ---
 
@@ -74,17 +74,20 @@ npx tsx src/index.ts
 
 ```
 src/
-  index.ts              — orchestrator
-  config.ts             — shared ABIs, client, types
+  index.ts                  — orchestrator (9 skills)
+  config.ts                 — ABIs, client, Skill interface
   skills/
-    vault-keeper.ts     — harvest, rebalance, TVL
-    credit-keeper.ts    — loans, liquidation, utilization
-    bond-keeper.ts      — serviceDebt, depositPrincipal
-    status-reporter.ts  — aggregated protocol summary
+    vault-keeper.ts         — harvest, rebalance, TVL
+    credit-keeper.ts        — loans, liquidation, utilization
+    bond-keeper.ts          — serviceDebt, depositPrincipal
+    status-reporter.ts      — aggregated protocol summary
+    telegram-skill.ts       — interactive community bot
+    x-skill.ts              — scheduled protocol posts
+    narrator-skill.ts       — real-time keeper narration
+    insight-skill.ts        — protocol insights, education
+    engagement-skill.ts     — milestones, ATH, daily briefing
   social/
-    telegram-bot.ts     — interactive community bot
-    x-poster.ts         — scheduled protocol updates
-    voice.ts            — on-brand personality module
+    voice.ts                — on-brand personality module
 ```
 
 ---

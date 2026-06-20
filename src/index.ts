@@ -1,100 +1,129 @@
+#!/usr/bin/env node
+
 import { ADDR, hasWriteAccess, alert } from "./config.js";
+
+// Keeper Skills
 import { VaultKeeper } from "./skills/vault-keeper.js";
 import { CreditKeeper } from "./skills/credit-keeper.js";
 import { BondKeeper } from "./skills/bond-keeper.js";
 import { StatusReporter } from "./skills/status-reporter.js";
-import { startTelegramBot, stopTelegramBot } from "./social/telegram-bot.js";
-import { startXPoster } from "./social/x-poster.js";
+
+// Social Skills
+import { TelegramSkill } from "./skills/telegram-skill.js";
+import { XSkill } from "./skills/x-skill.js";
+import { NarratorSkill } from "./skills/narrator-skill.js";
+import { InsightSkill } from "./skills/insight-skill.js";
+import { EngagementSkill } from "./skills/engagement-skill.js";
 
 // ═══════════════════════════════════════════════════
 //  CUSTOS — The Keeper of the Citadel
-//  Autonomous DeFi agent for Arcis Protocol
+//  9 Skills. Autonomous protocol agent.
 // ═══════════════════════════════════════════════════
 
 // ── Intervals ──
-const VAULT_INTERVAL = 300_000;    // 5 min
-const CREDIT_INTERVAL = 60_000;    // 1 min
-const BOND_INTERVAL = 600_000;     // 10 min
-const STATUS_INTERVAL = 3_600_000; // 1 hour
+const VAULT_INT = 300_000;      // 5 min
+const CREDIT_INT = 60_000;      // 1 min
+const BOND_INT = 600_000;       // 10 min
+const STATUS_INT = 3_600_000;   // 1 hour
+const TELEGRAM_INT = 2_000;     // 2 sec (poll)
+const X_INT = 14_400_000;       // 4 hours
+const NARRATOR_INT = 30_000;    // 30 sec (drain queue)
+const INSIGHT_INT = 3_600_000;  // 1 hour
+const ENGAGE_INT = 600_000;     // 10 min
 
 // ── Skills ──
 const vaultKeeper = new VaultKeeper();
 const creditKeeper = new CreditKeeper();
 const bondKeeper = new BondKeeper();
 const statusReporter = new StatusReporter();
+const telegramSkill = new TelegramSkill();
+const xSkill = new XSkill();
+const narratorSkill = new NarratorSkill();
+const insightSkill = new InsightSkill();
+const engagementSkill = new EngagementSkill();
 
-// Register all skills for aggregated status reports
-statusReporter.registerSkills([vaultKeeper, creditKeeper, bondKeeper, statusReporter]);
+// Wire cross-skill connections
+const allSkills = [vaultKeeper, creditKeeper, bondKeeper, statusReporter, telegramSkill, xSkill, narratorSkill, insightSkill, engagementSkill];
+statusReporter.registerSkills(allSkills);
+narratorSkill.setXSkill(xSkill);
+insightSkill.setXSkill(xSkill);
+engagementSkill.setXSkill(xSkill);
 
-// ── Graceful Shutdown ──
-let running = true;
-
+// ── Shutdown ──
 process.on("SIGINT", async () => {
   console.log("\n[CUSTOS] Shutting down...");
-  running = false;
-  stopTelegramBot();
-
-  // Final status report
   await statusReporter.run();
   await alert("CUSTOS shutting down. The keeper rests.", "INFO");
   process.exit(0);
 });
-
-process.on("SIGTERM", () => {
-  running = false;
-  process.exit(0);
-});
+process.on("SIGTERM", () => process.exit(0));
 
 // ── Main ──
 async function main() {
-  console.log("");
-  console.log("  \u2554\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2557");
-  console.log("  \u2551   C U S T O S                        \u2551");
-  console.log("  \u2551   The Keeper of the Citadel           \u2551");
-  console.log("  \u255A\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u255D");
-  console.log("");
-  console.log(`  Vault:      ${ADDR.vault}`);
-  console.log(`  Credit:     ${ADDR.credit}`);
-  console.log(`  Bonds:      ${ADDR.bondFactory || "not deployed"}`);
-  console.log(`  Mode:       ${hasWriteAccess() ? "KEEPER (read + write)" : "MONITOR (read-only)"}`);
-  console.log(`  Telegram:   ${process.env.TELEGRAM_BOT_TOKEN ? "interactive bot" : "disabled"}`);
-  console.log(`  X/Twitter:  ${process.env.X_API_KEY ? "posting enabled" : "dry-run (logs only)"}`);
-  console.log("");
-  console.log("  Skills:");
-  console.log(`    VaultKeeper     every ${VAULT_INTERVAL / 1000}s   harvest, rebalance, TVL`);
-  console.log(`    CreditKeeper    every ${CREDIT_INTERVAL / 1000}s    loans, liquidation, utilization`);
-  console.log(`    BondKeeper      every ${BOND_INTERVAL / 1000}s  serviceDebt, depositPrincipal`);
-  console.log(`    StatusReporter  every ${STATUS_INTERVAL / 1000}s protocol summary`);
-  console.log("");
+  const tg = process.env.TELEGRAM_BOT_TOKEN ? "interactive bot" : "disabled";
+  const xm = process.env.X_API_KEY ? "live posting" : "dry-run";
 
-  // Initial run of all skills
+  console.log(`
+  ┌──────────────────────────────────────┐
+  │                                      │
+  │  CUSTOS                              │
+  │  The citadel of agent capital        │
+  │                                      │
+  └──────────────────────────────────────┘
+
+  Vault:      ${ADDR.vault}
+  Credit:     ${ADDR.credit}
+  Bonds:      ${ADDR.bondFactory || "not deployed"}
+  Mode:       ${hasWriteAccess() ? "KEEPER (read + write)" : "MONITOR (read-only)"}
+  Telegram:   ${tg}
+  X/Twitter:  ${xm}
+
+  Keeper Skills:
+    VaultKeeper     ${VAULT_INT / 1000}s     harvest, rebalance, TVL
+    CreditKeeper    ${CREDIT_INT / 1000}s      loans, liquidation, utilization
+    BondKeeper      ${BOND_INT / 1000}s    serviceDebt, depositPrincipal
+    StatusReporter  ${STATUS_INT / 1000}s  protocol summary
+
+  Social Skills:
+    TelegramSkill   ${TELEGRAM_INT / 1000}s       interactive bot
+    XSkill          ${X_INT / 1000}s  scheduled posts
+    NarratorSkill   ${NARRATOR_INT / 1000}s      keeper action narration
+    InsightSkill    ${INSIGHT_INT / 1000}s  protocol insights
+    EngagementSkill ${ENGAGE_INT / 1000}s    milestones, daily briefing
+`);
+
+  // Initialize Telegram bot commands
+  await telegramSkill.initialize();
+
+  // Initial run — keeper skills
   await vaultKeeper.run();
   await creditKeeper.run();
   await bondKeeper.run();
   await statusReporter.run();
 
-  // Start keeper loops
-  const intervals = [
-    setInterval(() => vaultKeeper.run(), VAULT_INTERVAL),
-    setInterval(() => creditKeeper.run(), CREDIT_INTERVAL),
-    setInterval(() => bondKeeper.run(), BOND_INTERVAL),
-    setInterval(() => statusReporter.run(), STATUS_INTERVAL),
-  ];
+  // Start all loops
+  setInterval(() => vaultKeeper.run(), VAULT_INT);
+  setInterval(() => creditKeeper.run(), CREDIT_INT);
+  setInterval(() => bondKeeper.run(), BOND_INT);
+  setInterval(() => statusReporter.run(), STATUS_INT);
+  setInterval(() => telegramSkill.run(), TELEGRAM_INT);
+  setInterval(() => narratorSkill.run(), NARRATOR_INT);
+  setInterval(() => insightSkill.run(), INSIGHT_INT);
+  setInterval(() => engagementSkill.run(), ENGAGE_INT);
 
-  await alert(
-    `CUSTOS online.\nMode: ${hasWriteAccess() ? "KEEPER" : "MONITOR"}\nSkills: VaultKeeper, CreditKeeper, BondKeeper, StatusReporter`,
-    "INFO"
-  );
+  // X starts after 5 min delay (prevent restart spam)
+  setTimeout(() => {
+    xSkill.run();
+    setInterval(() => xSkill.run(), X_INT);
+  }, 300_000);
 
-  // Start social modules
-  startTelegramBot(); // Non-blocking — runs its own poll loop
-  startXPoster();     // Non-blocking — runs on timer
+  await alert(`CUSTOS online. 9 skills active.\nMode: ${hasWriteAccess() ? "KEEPER" : "MONITOR"}\nTelegram: ${tg} | X: ${xm}`, "INFO");
 
-  console.log("  Custos is watching. Press Ctrl+C to stop.\n");
+  console.log("  Custos is watching.\n");
 }
 
 main().catch(async (e) => {
   console.error("[CUSTOS] Fatal:", e);
-  await alert(`CUSTOS fatal error: ${e.message?.slice(0, 100)}`, "CRIT");
+  await alert(`CUSTOS fatal: ${e.message?.slice(0, 80)}`, "CRIT");
   process.exit(1);
 });
