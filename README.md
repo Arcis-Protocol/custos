@@ -2,40 +2,37 @@
 
 **The Keeper of the Citadel.**
 
-CUSTOS is the autonomous keeper agent for Arcis Protocol. It monitors protocol health, harvests yield from strategies, scans credit positions, services bond obligations, and alerts operators — without human intervention.
-
-Every DeFi protocol needs a keeper. CUSTOS is Arcis's.
+Autonomous keeper agent for Arcis Protocol. Harvests yield, monitors health, services debt, answers community questions, and reports protocol status — all without human intervention.
 
 ---
 
-## Why a Keeper Agent
+## Skills
 
-Yield doesn't compound itself. Unhealthy loans don't liquidate themselves. Bond coupons don't service themselves.
+**VaultKeeper** (5 min) — harvest yield, TVL monitoring, invariant checks
 
-CUSTOS closes these operational gaps by running three keeper loops against the protocol's smart contracts, performing the maintenance actions that keep the system solvent, efficient, and healthy for every depositor, borrower, and bondholder.
+**CreditKeeper** (1 min) — loan scanning, liquidation, utilization alerts
+
+**BondKeeper** (10 min) — serviceDebt, depositPrincipal, default alerts
+
+**StatusReporter** (1 hour) — aggregated protocol summary to Telegram
 
 ---
 
-## What It Does
+## Social
 
-**Vault Keeper** (every 5 min)
-- Calls `harvest()` on yield strategies to compound returns
-- Monitors TVL for sudden drops (alerts on > 15% decline)
-- Detects vault pause state and alerts operators
+**Telegram Bot** — interactive community agent. Responds to commands and natural language.
 
-**Credit Keeper** (every 1 min)
-- Scans all active loans for collateral health
-- Flags undercollateralized positions for liquidation
-- Monitors credit pool utilization (alerts above 85%)
+| Command | Response |
+|---|---|
+| /status | Full protocol overview |
+| /vault | TVL, exchange rate, capacity |
+| /credit | Lending pool, utilization |
+| /bonds | Revenue bond status |
+| /ati | Agent Treasury Interface spec |
+| "what is arcis" | Protocol description |
+| "gm" | Keeper greeting |
 
-**Bond Keeper** (every 10 min)
-- Calls `serviceDebt()` on active bonds when escrow has revenue
-- Deposits principal approaching maturity deadlines
-- Alerts on bonds at risk of default
-
-**Status Reports** (every 1 hour)
-- Posts protocol health summary to Telegram
-- TVL, exchange rate, credit utilization, actions performed
+**X/Twitter** — scheduled posts alternating between protocol status updates and thesis commentary. Terse, institutional, never promotional.
 
 ---
 
@@ -46,21 +43,28 @@ git clone https://github.com/Arcis-Protocol/custos.git
 cd custos && npm install
 ```
 
-**Read-only (monitoring + alerts):**
+**Monitor only:**
 ```bash
 npx tsx src/index.ts
 ```
 
-**Full keeper (monitoring + on-chain actions):**
-```bash
-CUSTOS_PRIVATE_KEY=0x... npx tsx src/index.ts
-```
-
-**With Telegram alerts:**
+**Full keeper + Telegram bot:**
 ```bash
 CUSTOS_PRIVATE_KEY=0x... \
 TELEGRAM_BOT_TOKEN=your_bot_token \
 TELEGRAM_CHAT_ID=your_chat_id \
+npx tsx src/index.ts
+```
+
+**Full keeper + Telegram + X:**
+```bash
+CUSTOS_PRIVATE_KEY=0x... \
+TELEGRAM_BOT_TOKEN=your_bot_token \
+TELEGRAM_CHAT_ID=your_chat_id \
+X_API_KEY=your_key \
+X_API_SECRET=your_secret \
+X_ACCESS_TOKEN=your_token \
+X_ACCESS_SECRET=your_token_secret \
 npx tsx src/index.ts
 ```
 
@@ -69,25 +73,20 @@ npx tsx src/index.ts
 ## Architecture
 
 ```
-CUSTOS
-├── Vault Keeper     → harvest(), rebalance(), TVL alerts
-├── Credit Keeper    → loan health, liquidate(), utilization
-├── Bond Keeper      → serviceDebt(), depositPrincipal()
-└── Status Reporter  → Telegram, hourly protocol summary
+src/
+  index.ts              — orchestrator
+  config.ts             — shared ABIs, client, types
+  skills/
+    vault-keeper.ts     — harvest, rebalance, TVL
+    credit-keeper.ts    — loans, liquidation, utilization
+    bond-keeper.ts      — serviceDebt, depositPrincipal
+    status-reporter.ts  — aggregated protocol summary
+  social/
+    telegram-bot.ts     — interactive community bot
+    x-poster.ts         — scheduled protocol updates
+    voice.ts            — on-brand personality module
 ```
-
-CUSTOS uses the same ATI and contract interfaces that any external agent would. It dogfoods the protocol's own SDK patterns — if CUSTOS can operate the protocol autonomously, any agent framework can.
-
-## Related Repos
-
-| Repo | Description |
-|---|---|
-| [`core`](https://github.com/Arcis-Protocol/core) | Smart contracts CUSTOS operates against |
-| [`sdk`](https://github.com/Arcis-Protocol/sdk) | TypeScript SDK — `@arcisprotocol/sdk` |
-| [`mcp`](https://github.com/Arcis-Protocol/mcp) | MCP Server for Claude / LLM agents |
-| [`app`](https://github.com/Arcis-Protocol/app) | arcis.money — landing + dashboard |
-| [`docs`](https://github.com/Arcis-Protocol/docs) | ATI spec, integration guide |
 
 ---
 
-*CUSTOS ARCIS · The Keeper watches. The citadel endures. · MMXXVI*
+*CUSTOS ARCIS · The keeper watches. The citadel endures. · MMXXVI*

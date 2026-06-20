@@ -3,6 +3,8 @@ import { VaultKeeper } from "./skills/vault-keeper.js";
 import { CreditKeeper } from "./skills/credit-keeper.js";
 import { BondKeeper } from "./skills/bond-keeper.js";
 import { StatusReporter } from "./skills/status-reporter.js";
+import { startTelegramBot, stopTelegramBot } from "./social/telegram-bot.js";
+import { startXPoster } from "./social/x-poster.js";
 
 // ═══════════════════════════════════════════════════
 //  CUSTOS — The Keeper of the Citadel
@@ -30,6 +32,7 @@ let running = true;
 process.on("SIGINT", async () => {
   console.log("\n[CUSTOS] Shutting down...");
   running = false;
+  stopTelegramBot();
 
   // Final status report
   await statusReporter.run();
@@ -54,7 +57,8 @@ async function main() {
   console.log(`  Credit:     ${ADDR.credit}`);
   console.log(`  Bonds:      ${ADDR.bondFactory || "not deployed"}`);
   console.log(`  Mode:       ${hasWriteAccess() ? "KEEPER (read + write)" : "MONITOR (read-only)"}`);
-  console.log(`  Telegram:   ${process.env.TELEGRAM_BOT_TOKEN ? "configured" : "stdout only"}`);
+  console.log(`  Telegram:   ${process.env.TELEGRAM_BOT_TOKEN ? "interactive bot" : "disabled"}`);
+  console.log(`  X/Twitter:  ${process.env.X_API_KEY ? "posting enabled" : "dry-run (logs only)"}`);
   console.log("");
   console.log("  Skills:");
   console.log(`    VaultKeeper     every ${VAULT_INTERVAL / 1000}s   harvest, rebalance, TVL`);
@@ -81,6 +85,10 @@ async function main() {
     `CUSTOS online.\nMode: ${hasWriteAccess() ? "KEEPER" : "MONITOR"}\nSkills: VaultKeeper, CreditKeeper, BondKeeper, StatusReporter`,
     "INFO"
   );
+
+  // Start social modules
+  startTelegramBot(); // Non-blocking — runs its own poll loop
+  startXPoster();     // Non-blocking — runs on timer
 
   console.log("  Custos is watching. Press Ctrl+C to stop.\n");
 }
