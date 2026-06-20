@@ -1,0 +1,124 @@
+import {
+  createPublicClient, createWalletClient, http, defineChain,
+  type Address, type PublicClient, type WalletClient,
+} from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+
+// ── Chain ──
+export const baseSepolia = defineChain({
+  id: 84532, name: "Base Sepolia",
+  nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  rpcUrls: { default: { http: ["https://sepolia.base.org"] } },
+  blockExplorers: { default: { name: "Blockscout", url: "https://base-sepolia.blockscout.com" } },
+});
+
+// ── Addresses ──
+export const ADDR = {
+  vault: "0xa8eF658E125C7f6D7aFa9B6b8035b66b32CBE98d" as Address,
+  credit: "0x019540E33a0292a9DDE36bD9Ef11774d5A1Ce6FC" as Address,
+  router: "0x0281e7D37683c585325004F84e0b94170c78d5B4" as Address,
+  usdc: "0x29440A12f15fe6bDf5F624f4eeEB298CCb782f05" as Address,
+  allocator: "0x9f101e1159AA530dC5Cb104decB32aBA1eAF2617" as Address,
+  bondFactory: null as Address | null, // Deployed after mainnet
+};
+
+export const EXPLORER = "https://base-sepolia.blockscout.com";
+
+// ── ABIs ──
+export const VAULT_ABI = [
+  { name: "totalAssets", type: "function", inputs: [], outputs: [{ type: "uint256" }], stateMutability: "view" },
+  { name: "totalSupply", type: "function", inputs: [], outputs: [{ type: "uint256" }], stateMutability: "view" },
+  { name: "exchangeRate", type: "function", inputs: [], outputs: [{ type: "uint256" }], stateMutability: "view" },
+  { name: "depositCap", type: "function", inputs: [], outputs: [{ type: "uint256" }], stateMutability: "view" },
+  { name: "reserveBalance", type: "function", inputs: [], outputs: [{ type: "uint256" }], stateMutability: "view" },
+  { name: "deployedBalance", type: "function", inputs: [], outputs: [{ type: "uint256" }], stateMutability: "view" },
+  { name: "paused", type: "function", inputs: [], outputs: [{ type: "bool" }], stateMutability: "view" },
+  { name: "feeBps", type: "function", inputs: [], outputs: [{ type: "uint256" }], stateMutability: "view" },
+  { name: "harvest", type: "function", inputs: [], outputs: [{ type: "uint256" }], stateMutability: "nonpayable" },
+  { name: "rebalance", type: "function", inputs: [], outputs: [], stateMutability: "nonpayable" },
+] as const;
+
+export const CREDIT_ABI = [
+  { name: "lendingPool", type: "function", inputs: [], outputs: [{ type: "uint256" }], stateMutability: "view" },
+  { name: "totalBorrowed", type: "function", inputs: [], outputs: [{ type: "uint256" }], stateMutability: "view" },
+  { name: "baseRateBps", type: "function", inputs: [], outputs: [{ type: "uint256" }], stateMutability: "view" },
+  { name: "loanCount", type: "function", inputs: [], outputs: [{ type: "uint256" }], stateMutability: "view" },
+  { name: "totalOwed", type: "function", inputs: [{ name: "loanId", type: "uint256" }], outputs: [{ type: "uint256" }], stateMutability: "view" },
+  { name: "paused", type: "function", inputs: [], outputs: [{ type: "bool" }], stateMutability: "view" },
+  { name: "liquidate", type: "function", inputs: [{ name: "loanId", type: "uint256" }], outputs: [], stateMutability: "nonpayable" },
+] as const;
+
+export const BOND_ABI = [
+  { name: "bondCount", type: "function", inputs: [], outputs: [{ type: "uint256" }], stateMutability: "view" },
+  { name: "escrowBalances", type: "function", inputs: [{ name: "bondId", type: "uint256" }], outputs: [{ type: "uint256" }], stateMutability: "view" },
+  { name: "totalRevenueAccumulated", type: "function", inputs: [{ name: "bondId", type: "uint256" }], outputs: [{ type: "uint256" }], stateMutability: "view" },
+  { name: "paused", type: "function", inputs: [], outputs: [{ type: "bool" }], stateMutability: "view" },
+  { name: "serviceDebt", type: "function", inputs: [{ name: "bondId", type: "uint256" }], outputs: [], stateMutability: "nonpayable" },
+  { name: "depositPrincipal", type: "function", inputs: [{ name: "bondId", type: "uint256" }, { name: "amount", type: "uint256" }], outputs: [], stateMutability: "nonpayable" },
+] as const;
+
+// ── Client ──
+export const client: PublicClient = createPublicClient({ chain: baseSepolia, transport: http() });
+
+const PRIVATE_KEY = process.env.CUSTOS_PRIVATE_KEY as `0x${string}` | undefined;
+
+export function getWallet(): WalletClient | null {
+  if (!PRIVATE_KEY) return null;
+  const account = privateKeyToAccount(PRIVATE_KEY);
+  return createWalletClient({ chain: baseSepolia, transport: http(), account });
+}
+
+export function hasWriteAccess(): boolean {
+  return !!PRIVATE_KEY;
+}
+
+// ── Helpers ──
+export const fmtUSDC = (v: bigint) =>
+  "$" + (Number(v) / 1e6).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+export const fmtAddr = (a: string) => a.slice(0, 6) + "..." + a.slice(-4);
+
+export const fmtDuration = (ms: number) => {
+  const mins = Math.floor(ms / 60_000);
+  if (mins < 60) return `${mins}m`;
+  const hrs = Math.floor(mins / 60);
+  return `${hrs}h ${mins % 60}m`;
+};
+
+// ── Telegram ──
+const TELEGRAM_BOT = process.env.TELEGRAM_BOT_TOKEN || "";
+const TELEGRAM_CHAT = process.env.TELEGRAM_CHAT_ID || "";
+
+export async function alert(msg: string, level: "INFO" | "WARN" | "CRIT" = "INFO") {
+  const icon = level === "CRIT" ? "\u{1F534}" : level === "WARN" ? "\u{1F7E1}" : "\u{1F7E2}";
+  const text = `${icon} *CUSTOS*\n\n${msg}\n\n_${new Date().toISOString()}_`;
+  console.log(`[CUSTOS ${level}] ${msg.split("\n")[0]}`);
+
+  if (TELEGRAM_BOT && TELEGRAM_CHAT) {
+    try {
+      await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: TELEGRAM_CHAT, text, parse_mode: "Markdown", disable_web_page_preview: true }),
+      });
+    } catch (e: any) {
+      console.error("  Telegram failed:", e.message);
+    }
+  }
+}
+
+// ── Skill Interface ──
+export interface SkillStats {
+  name: string;
+  runs: number;
+  actions: number;
+  errors: number;
+  lastRun: number;
+  details: Record<string, string>;
+}
+
+export interface Skill {
+  name: string;
+  run(): Promise<void>;
+  stats(): SkillStats;
+}
