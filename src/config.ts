@@ -122,3 +122,63 @@ export interface Skill {
   run(): Promise<void>;
   stats(): SkillStats;
 }
+
+// ── Multicall Batching ──
+// Multicall3 is deployed at the same address on every EVM chain
+const MULTICALL3 = "0xcA11bde05977b3631167028862bE2a173976CA11" as Address;
+
+const MULTICALL3_ABI = [
+  {
+    name: "aggregate3",
+    type: "function",
+    inputs: [{ name: "calls", type: "tuple[]", components: [
+      { name: "target", type: "address" },
+      { name: "allowFailure", type: "bool" },
+      { name: "callData", type: "bytes" },
+    ]}],
+    outputs: [{ name: "returnData", type: "tuple[]", components: [
+      { name: "success", type: "bool" },
+      { name: "returnData", type: "bytes" },
+    ]}],
+    stateMutability: "view",
+  },
+] as const;
+
+import { encodeFunctionData, decodeFunctionResult } from "viem";
+
+interface BatchCall {
+  address: Address;
+  abi: readonly any[];
+  functionName: string;
+  args?: any[];
+}
+
+export async function multicall(calls: BatchCall[]): Promise<any[]> {
+  const encodedCalls = calls.map(c => ({
+    target: c.address,
+    allowFailure: true,
+    callData: encodeFunctionData({
+      abi: c.abi,
+      functionName: c.functionName,
+      args: c.args || [],
+    }),
+  }));
+
+  const results = await client.readContract({
+    address: MULTICALL3,
+    abi: MULTICALL3_ABI,
+    functionName: "aggregate3",
+    args: [encodedCalls],
+  }) as { success: boolean; returnData: `0x${string}` }[];
+
+  return results.map((r, i) => {
+    if (!r.success) return null;
+    try {
+      return decodeFunctionResult({
+        abi: calls[i].abi,
+        functionName: calls[i].functionName,
+        data: r.returnData,
+      });
+    } catch { return null; }
+  });
+}
