@@ -1,8 +1,8 @@
-# @CustosArcis — X Profile
+# @custos0x — X Profile
 
 ## Account Setup
 
-**Handle:** @CustosArcis
+**Handle:** @custos0x
 **Display Name:** CUSTOS
 **Category:** Technology
 
