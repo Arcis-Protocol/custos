@@ -2,7 +2,7 @@
 
 **The Keeper of the Citadel.**
 
-Autonomous keeper and community agent for Arcis Protocol. 9 skills. Harvests yield, monitors health, services debt, engages community, posts insights, and narrates protocol operations.
+Autonomous keeper and community agent for Arcis Protocol. Live on Base mainnet. 9 skills. Harvests yield, monitors health, services debt, engages community, posts insights, and narrates protocol operations.
 
 ---
 
