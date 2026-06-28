@@ -15,7 +15,7 @@ export const baseSepolia = defineChain({
 // ── Addresses ──
 export const ADDR = {
   vault: "0x00325d9da832b38179ed2f0dabd4062d93e325a7" as Address,
-  credit: "0x019540E33a0292a9DDE36bD9Ef11774d5A1Ce6FC" as Address,
+  credit: "0xdf31800e620f728297340d66acf5a306f07ce7a1" as Address,
   router: "0xeC3b7Daa942C03651D55A4A01797498fA6dB728F" as Address,
   usdc: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" as Address,
   allocator: "0x7Fd5d7b49694858FCf143E0039e83cDB0196DD7A" as Address,
