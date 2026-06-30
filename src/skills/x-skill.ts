@@ -88,7 +88,7 @@ export class XSkill implements Skill {
       ]);
       const total = pool + borrowed;
       const util = total > 0n ? (Number(borrowed * 10000n / total) / 100).toFixed(1) : "0.0";
-      const rateStr = supply > 0n ? (Number(rate) / 1e18).toFixed(6) : "1.000000";
+      const rateStr = supply > 0n ? (Number(rate) / 1e24).toFixed(6) : "1.000000";
       await this.post(voice.xStatus(fmtUSDC(totalAssets), rateStr, `${util}%`, this.postCount, fmtDuration(Date.now() - this.startTime)));
     } catch (e: any) { this.errors++; }
   }

@@ -53,7 +53,7 @@ export class TelegramSkill implements Skill {
 
       const total = pool + borrowed;
       const util = total > 0n ? (Number(borrowed * 10000n / total) / 100).toFixed(1) : "0.0";
-      const rateStr = supply > 0n ? (Number(rate) / 1e18).toFixed(6) : "1.000000";
+      const rateStr = supply > 0n ? (Number(rate) / 1e24).toFixed(6) : "1.000000";
 
       await this.send(chatId, [
         `*Protocol Status*`,
@@ -80,7 +80,7 @@ export class TelegramSkill implements Skill {
       const util = cap > 0n ? (Number(totalAssets * 10000n / cap) / 100).toFixed(1) : "0";
       await this.send(chatId, [
         `*Vault*`, ``, `TVL: ${fmtUSDC(totalAssets)}`,
-        `Rate: ${(Number(rate) / 1e18).toFixed(6)}`,
+        `Rate: ${(Number(rate) / 1e24).toFixed(6)} USDC/share`,
         `Cap: ${fmtUSDC(cap)} (${util}% filled)`,
         `Reserve: ${fmtUSDC(reserve)} | Deployed: ${fmtUSDC(deployed)}`,
       ].join("\n"));

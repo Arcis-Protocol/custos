@@ -45,7 +45,7 @@ async function cmdStatus(chatId: string | number) {
 
     const total = pool + borrowed;
     const util = total > 0n ? (Number(borrowed * 10000n / total) / 100).toFixed(1) : "0.0";
-    const rateStr = supply > 0n ? (Number(rate) / 1e18).toFixed(6) : "1.000000";
+    const rateStr = supply > 0n ? (Number(rate) / 1e24).toFixed(6) : "1.000000";
 
     const msg = [
       `*Protocol Status*`,
@@ -79,7 +79,7 @@ async function cmdVault(chatId: string | number) {
     ]);
 
     const util = cap > 0n ? (Number(totalAssets * 10000n / cap) / 100).toFixed(1) : "0";
-    const rateStr = (Number(rate) / 1e18).toFixed(6);
+    const rateStr = (Number(rate) / 1e24).toFixed(6);
 
     const msg = [
       `*Vault*`,

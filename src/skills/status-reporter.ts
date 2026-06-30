@@ -60,7 +60,7 @@ export class StatusReporter implements Skill {
         `*Vault*`,
         `TVL: ${fmtUSDC(totalAssets)}`,
         `Rate: ${rateStr} USDC/raUSDC`,
-        `Supply: ${fmtUSDC(supply)} raUSDC`,
+        `Supply: ${Number(supply).toLocaleString()} shares raUSDC`,
         `Reserve: ${fmtUSDC(reserve)} | Deployed: ${fmtUSDC(deployed)}`,
         ``,
         `*Credit*`,
