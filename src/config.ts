@@ -19,7 +19,8 @@ export const ADDR = {
   router: "0xd0c64f997ca9aa427f8834578bd7f0313f868e83" as Address,
   usdc: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" as Address,
   allocator: "0x7Fd5d7b49694858FCf143E0039e83cDB0196DD7A" as Address,
-  bondFactory: null as Address | null, // Deployed after mainnet
+  bondFactory: "0xeb65d8bb08e0ea4a6bb9162d53d1b444f99681ba" as Address,
+  identity: "0xaa4da295dd368c0f10128654af76e3f002e20e71" as Address,
 };
 
 export const EXPLORER = "https://basescan.org";
@@ -58,7 +59,12 @@ export const BOND_ABI = [
 ] as const;
 
 // ── Client ──
-export const client: PublicClient = createPublicClient({ chain: baseSepolia, transport: http() });
+const RPC_URL = process.env.BASE_RPC_URL || "https://mainnet.base.org";
+export const client: PublicClient = createPublicClient({
+  chain: baseSepolia,
+  transport: http(RPC_URL),
+  batch: { multicall: true },
+});
 
 const PRIVATE_KEY = process.env.CUSTOS_PRIVATE_KEY as `0x${string}` | undefined;
 

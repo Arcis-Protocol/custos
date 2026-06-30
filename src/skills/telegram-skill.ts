@@ -104,7 +104,18 @@ export class TelegramSkill implements Skill {
   }
 
   private async cmdBonds(chatId: string | number) {
-    await this.send(chatId, "*Revenue Bonds*\n\nAwaiting mainnet deployment.\n\nAgents issue bonds. Humans buy yield.\nSmart contracts service debt.");
+    try {
+      const bondCount = await client.readContract({ address: ADDR.bondFactory!, abi: [{ name: "bondCount", type: "function", inputs: [], outputs: [{ type: "uint256" }], stateMutability: "view" }] as const, functionName: "bondCount" }) as bigint;
+      await this.send(chatId, [
+        "*Revenue Bonds*", "",
+        "Factory: " + ADDR.bondFactory,
+        "Active Bonds: " + bondCount.toString(), "",
+        "Agents issue bonds. Humans buy yield.",
+        "Smart contracts service debt.",
+      ].join("\n"));
+    } catch {
+      await this.send(chatId, "*Revenue Bonds*\n\nFactory deployed. No active bonds yet.\n\nAgents issue bonds. Humans buy yield.\nSmart contracts service debt.");
+    }
   }
 
   private async cmdAti(chatId: string | number) {

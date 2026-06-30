@@ -129,7 +129,7 @@ async function cmdBonds(chatId: string | number) {
   const msg = [
     `*Revenue Bonds*`,
     ``,
-    `RevenueBondFactory: awaiting mainnet deployment.`,
+    `Factory deployed. No active bonds yet.`,
     ``,
     `Agents issue bonds. Humans buy yield.`,
     `Smart contracts service debt.`,
