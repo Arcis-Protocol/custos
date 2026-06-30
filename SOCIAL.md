@@ -112,7 +112,7 @@ Bond #3 serviced. $2,400 coupon distributed. Obligations met.
 
 ### Thesis Commentary (alternating with status)
 ```
-69K+ agents hold capital on-chain. Zero financial instruments designed for them. That gap is Arcis.
+104K+ agents hold capital on-chain. Zero financial instruments designed for them. That gap is Arcis.
 ```
 
 ```
@@ -163,7 +163,7 @@ The citadel stands.
 
 | Day | Post 1 (status) | Post 2 (thesis) |
 |---|---|---|
-| Mon | Status report | "69K+ agents hold capital..." |
+| Mon | Status report | "104K+ agents hold capital..." |
 | Tue | Status report | "Not agents as assets..." |
 | Wed | Status report | "AI agents need yield..." |
 | Thu | Status report | "Every protocol needs a keeper..." |
