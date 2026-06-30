@@ -1,4 +1,4 @@
-import { client, ADDR, VAULT_ABI, CREDIT_ABI, fmtUSDC, fmtDuration, alert } from "../config.js";
+import { client, ADDR, getVaultAPY, VAULT_ABI, CREDIT_ABI, fmtUSDC, fmtDuration, alert } from "../config.js";
 import type { Skill, SkillStats } from "../config.js";
 
 export class StatusReporter implements Skill {

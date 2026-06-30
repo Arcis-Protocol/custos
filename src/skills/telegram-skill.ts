@@ -1,4 +1,4 @@
-import { client, ADDR, VAULT_ABI, CREDIT_ABI, fmtUSDC } from "../config.js";
+import { client, ADDR, getVaultAPY, VAULT_ABI, CREDIT_ABI, fmtUSDC } from "../config.js";
 import * as voice from "../social/voice.js";
 import type { Skill, SkillStats } from "../config.js";
 

@@ -13,6 +13,8 @@ export const baseSepolia = defineChain({
 });
 
 // ── Addresses ──
+export const AAVE_POOL = "0xA238Dd80C259a72e81d7e4664a9801593F98d1c5" as Address;
+
 export const ADDR = {
   vault: "0x00325d9da832b38179ed2f0dabd4062d93e325a7" as Address,
   credit: "0xdf31800e620f728297340d66acf5a306f07ce7a1" as Address,
@@ -188,4 +190,21 @@ export async function multicall(calls: BatchCall[]): Promise<any[]> {
       });
     } catch { return null; }
   });
+}
+
+export async function getVaultAPY(): Promise<string> {
+  try {
+    const data = await client.readContract({
+      address: AAVE_POOL as Address,
+      abi: [{ name: "getReserveData", type: "function", inputs: [{ name: "asset", type: "address" }], outputs: [{ name: "", type: "uint256" }, { name: "", type: "uint128" }, { name: "", type: "uint128" }, { name: "", type: "uint128" }, { name: "", type: "uint128" }, { name: "", type: "uint128" }, { name: "", type: "uint40" }, { name: "", type: "uint16" }, { name: "", type: "address" }, { name: "", type: "address" }, { name: "", type: "address" }, { name: "", type: "address" }, { name: "", type: "uint128" }, { name: "", type: "uint128" }, { name: "", type: "uint128" }], stateMutability: "view" }] as const,
+      functionName: "getReserveData",
+      args: [ADDR.usdc],
+    }) as any[];
+    const liquidityRate = BigInt(data[2]); // currentLiquidityRate in RAY
+    const aaveApr = Number(liquidityRate) / 1e27 * 100;
+    const vaultApy = (aaveApr * 0.70 * 0.98); // 70% allocation, 2% fee
+    return vaultApy.toFixed(2);
+  } catch {
+    return "~2.20";
+  }
 }
