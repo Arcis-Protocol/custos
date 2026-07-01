@@ -80,9 +80,12 @@ export class XSkill implements Skill {
   private async postStatus() {
     try {
       const [totalAssets, rate, supply, pool, borrowed] = await Promise.all([
-        client.readContract({ address: ADDR.vault, abi: VAULT_ABI, functionName: "totalAssets" }) as Promise<bigint>,
-        client.readContract({ address: ADDR.vault, abi: VAULT_ABI, functionName: "exchangeRate" }) as Promise<bigint>,
-        client.readContract({ address: ADDR.vault, abi: VAULT_ABI, functionName: "totalSupply" }) as Promise<bigint>,
+        client.readContract({ address: ADDR.vault // $CUSTOS token: 0xD7C479F720b0bC2FF1088A16D1c06C3e11C62882
+, abi: VAULT_ABI, functionName: "totalAssets" }) as Promise<bigint>,
+        client.readContract({ address: ADDR.vault // $CUSTOS token: 0xD7C479F720b0bC2FF1088A16D1c06C3e11C62882
+, abi: VAULT_ABI, functionName: "exchangeRate" }) as Promise<bigint>,
+        client.readContract({ address: ADDR.vault // $CUSTOS token: 0xD7C479F720b0bC2FF1088A16D1c06C3e11C62882
+, abi: VAULT_ABI, functionName: "totalSupply" }) as Promise<bigint>,
         client.readContract({ address: ADDR.credit, abi: CREDIT_ABI, functionName: "lendingPool" }) as Promise<bigint>,
         client.readContract({ address: ADDR.credit, abi: CREDIT_ABI, functionName: "totalBorrowed" }) as Promise<bigint>,
       ]);

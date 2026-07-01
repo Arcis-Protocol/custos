@@ -185,3 +185,11 @@ Plus: milestone posts when TVL crosses thresholds.
 - Never argue. State facts and move on.
 - Retweet @ArcisProtocol announcements without comment
 - Never follow back automatically — follow only relevant agent/DeFi accounts
+
+
+## Token
+
+$CUSTOS on Virtuals Protocol
+Contract: `0xD7C479F720b0bC2FF1088A16D1c06C3e11C62882`
+Network: Base
+Basescan: https://basescan.org/token/0xD7C479F720b0bC2FF1088A16D1c06C3e11C62882

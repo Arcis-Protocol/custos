@@ -23,6 +23,7 @@ export const ADDR = {
   allocator: "0x7Fd5d7b49694858FCf143E0039e83cDB0196DD7A" as Address,
   bondFactory: "0xeb65d8bb08e0ea4a6bb9162d53d1b444f99681ba" as Address,
   identity: "0xaa4da295dd368c0f10128654af76e3f002e20e71" as Address,
+  custosToken: "0xD7C479F720b0bC2FF1088A16D1c06C3e11C62882" as Address,
 };
 
 export const EXPLORER = "https://basescan.org";
