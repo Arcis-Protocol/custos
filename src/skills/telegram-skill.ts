@@ -132,9 +132,51 @@ export class TelegramSkill implements Skill {
   private async cmdHelp(chatId: string | number) {
     await this.send(chatId, [
       `*CUSTOS — The Keeper of the Citadel*`, ``,
-      `/status  Protocol overview`, `/vault   TVL, rate, capacity`,
-      `/credit  Lending pool`, `/bonds   Bond status`, `/ati     ATI spec`, `/help    Commands`,
+      `*Protocol*`,
+      `/status  Protocol overview`,
+      `/vault   TVL, rate, capacity`,
+      `/credit  Lending pool`,
+      `/bonds   Bond status`,
+      `/ati     ATI spec`, ``,
+      `*Token*`,
+      `/token   $CUSTOS contract + links`,
+      `/price   Token info + trade links`,
+      `/buy     How to buy $CUSTOS`, ``,
+      `*Resources*`,
+      `/wp      Whitepaper`,
+      `/help    This menu`,
       ``, `[arcis.money](https://arcis.money) · [Dashboard](https://arcis.money/dashboard) · [GitHub](https://github.com/Arcis-Protocol)`,
+    ].join("\n"));
+  }
+
+  private async cmdToken(chatId: string | number) {
+    await this.send(chatId, [
+      `*$CUSTOS Token*`, ``,
+      `Contract: \`0xD7C479F720b0bC2FF1088A16D1c06C3e11C62882\``,
+      `Network: Base`,
+      `Platform: Virtuals Protocol`, ``,
+      `[View on Basescan](https://basescan.org/token/0xD7C479F720b0bC2FF1088A16D1c06C3e11C62882)`,
+      `[Trade on Virtuals](https://app.virtuals.io)`,
+    ].join("\n"));
+  }
+
+  private async cmdBuy(chatId: string | number) {
+    await this.send(chatId, [
+      `*How to Buy $CUSTOS*`, ``,
+      `1. Get VIRTUAL tokens on Base`,
+      `2. Go to the CUSTOS agent page on Virtuals`,
+      `3. Use VIRTUAL to buy $CUSTOS on the bonding curve`, ``,
+      `Contract: \`0xD7C479F720b0bC2FF1088A16D1c06C3e11C62882\``,
+      `[Trade on Virtuals](https://app.virtuals.io)`,
+    ].join("\n"));
+  }
+
+  private async cmdWhitepaper(chatId: string | number) {
+    await this.send(chatId, [
+      `*Arcis Protocol Whitepaper v1.0*`, ``,
+      `12 sections: ATI Standard, Architecture, Financial Instruments,`,
+      `CUSTOS, MCP Integration, Economics, Roadmap.`, ``,
+      `[Read the Whitepaper](https://github.com/Arcis-Protocol/docs/blob/main/WHITEPAPER.md)`,
     ].join("\n"));
   }
 
@@ -151,6 +193,8 @@ export class TelegramSkill implements Skill {
       return this.send(chatId, "Arcis is financial infrastructure for autonomous AI agents. Yield-bearing vaults, identity-aware credit, revenue bonds. The citadel of agent capital.\n\narcis.money");
     if (l.includes("custos") || l.includes("keeper") || l.includes("who are you"))
       return this.send(chatId, "I am CUSTOS. The autonomous keeper of the citadel. I harvest yield, monitor loans, service bonds, and report protocol health.\n\n_Custos nunquam dormit._");
+    if (l.includes("token") || l.includes("price") || l.includes("buy custos")) return this.cmdToken(chatId);
+    if (l.includes("whitepaper") || l.includes("wp")) return this.cmdWhitepaper(chatId);
     if (l.includes("gm") || l.includes("hello") || l.includes("hi") || l.includes("hey"))
       return this.send(chatId, voice.greeting());
     return this.send(chatId, voice.unknownQuery() + "\n\nType /help for commands.");
@@ -177,7 +221,7 @@ export class TelegramSkill implements Skill {
         if (msg.from?.id) this.uniqueUsers.add(msg.from.id);
 
         const chatId = msg.chat.id;
-        const text = msg.text.trim();
+        const text = msg.text.trim().split("@")[0]; // Strip @botname for group commands
         console.log(`[TG] ${msg.from?.username || "anon"}: ${text}`);
 
         if (text.startsWith("/status")) await this.cmdStatus(chatId);
@@ -185,8 +229,11 @@ export class TelegramSkill implements Skill {
         else if (text.startsWith("/credit")) await this.cmdCredit(chatId);
         else if (text.startsWith("/bonds")) await this.cmdBonds(chatId);
         else if (text.startsWith("/ati")) await this.cmdAti(chatId);
+        else if (text.startsWith("/token") || text.startsWith("/price")) await this.cmdToken(chatId);
+        else if (text.startsWith("/buy")) await this.cmdBuy(chatId);
+        else if (text.startsWith("/whitepaper") || text.startsWith("/wp")) await this.cmdWhitepaper(chatId);
         else if (text.startsWith("/help") || text.startsWith("/start")) await this.cmdHelp(chatId);
-        else await this.handleMessage(chatId, text);
+        else if (!text.startsWith("/")) await this.handleMessage(chatId, text);
       }
     } catch (e: any) {
       if (!e.message?.includes("abort")) this.errors++;
@@ -203,12 +250,16 @@ export class TelegramSkill implements Skill {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         commands: [
-          { command: "status", description: "Full protocol overview" },
+          { command: "status", description: "Protocol overview (TVL, rate, APY)" },
           { command: "vault", description: "Vault TVL, rate, capacity" },
-          { command: "credit", description: "Lending pool, utilization" },
-          { command: "bonds", description: "Revenue bond status" },
-          { command: "ati", description: "Agent Treasury Interface spec" },
-          { command: "help", description: "Command list" },
+          { command: "credit", description: "Credit pool and utilization" },
+          { command: "bonds", description: "Bond factory status" },
+          { command: "token", description: "$CUSTOS token info and links" },
+          { command: "price", description: "Token contract and trade links" },
+          { command: "buy", description: "How to buy $CUSTOS" },
+          { command: "wp", description: "Whitepaper" },
+          { command: "ati", description: "ATI standard spec" },
+          { command: "help", description: "All commands" },
         ],
       }),
     });
