@@ -233,7 +233,7 @@ export class TelegramSkill implements Skill {
         else if (text.startsWith("/buy")) await this.cmdBuy(chatId);
         else if (text.startsWith("/whitepaper") || text.startsWith("/wp")) await this.cmdWhitepaper(chatId);
         else if (text.startsWith("/help") || text.startsWith("/start")) await this.cmdHelp(chatId);
-        else if (!text.startsWith("/")) await this.handleMessage(chatId, text);
+        else if (!text.startsWith("/") && msg.chat.type === "private") await this.handleMessage(chatId, text);
       }
     } catch (e: any) {
       if (!e.message?.includes("abort")) this.errors++;
