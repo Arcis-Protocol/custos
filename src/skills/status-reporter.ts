@@ -34,7 +34,7 @@ export class StatusReporter implements Skill {
 
       const total = pool + borrowed;
       const utilization = total > 0n ? Number(borrowed * 10000n / total) / 100 : 0;
-      const rateStr = supply > 0n ? (Number(rate) / 1e18).toFixed(6) : "1.000000";
+      const rateStr = supply > 0n ? (Number(rate) / 1e24).toFixed(6) : "1.000000";
       const uptime = fmtDuration(Date.now() - this.startTime);
 
       // Aggregate skill stats
@@ -59,7 +59,7 @@ export class StatusReporter implements Skill {
         ``,
         `*Vault*`,
         `TVL: ${fmtUSDC(totalAssets)}`,
-        `Rate: ${rateStr} USDC/raUSDC`,
+        `Rate: ${rateStr} | APY: ${await getVaultAPY()}%`,
         `Supply: ${Number(supply).toLocaleString()} shares raUSDC`,
         `Reserve: ${fmtUSDC(reserve)} | Deployed: ${fmtUSDC(deployed)}`,
         ``,

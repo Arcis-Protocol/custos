@@ -195,16 +195,22 @@ export async function multicall(calls: BatchCall[]): Promise<any[]> {
 
 export async function getVaultAPY(): Promise<string> {
   try {
-    const data = await client.readContract({
-      address: AAVE_POOL as Address,
-      abi: [{ name: "getReserveData", type: "function", inputs: [{ name: "asset", type: "address" }], outputs: [{ name: "", type: "uint256" }, { name: "", type: "uint128" }, { name: "", type: "uint128" }, { name: "", type: "uint128" }, { name: "", type: "uint128" }, { name: "", type: "uint128" }, { name: "", type: "uint40" }, { name: "", type: "uint16" }, { name: "", type: "address" }, { name: "", type: "address" }, { name: "", type: "address" }, { name: "", type: "address" }, { name: "", type: "uint128" }, { name: "", type: "uint128" }, { name: "", type: "uint128" }], stateMutability: "view" }] as const,
-      functionName: "getReserveData",
-      args: [ADDR.usdc],
-    }) as any[];
-    const liquidityRate = BigInt(data[2]); // currentLiquidityRate in RAY
+    // Read Aave currentLiquidityRate via raw eth_call (avoids complex struct ABI issues)
+    const selector = "0x35ea6a75"; // getReserveData(address)
+    const paddedUsdc = ADDR.usdc.slice(2).padStart(64, "0");
+    const result = await client.call({
+      to: AAVE_POOL as Address,
+      data: ("0x35ea6a75" + paddedUsdc) as `0x${string}`,
+    });
+    if (!result.data || result.data === "0x") return "~2.20";
+    // currentLiquidityRate is at bytes 96-128 (3rd 32-byte word after config + liquidityIndex)
+    // Actually in the packed struct: config=32bytes, liquidityIndex=32bytes, currentLiquidityRate=32bytes
+    const rateHex = "0x" + result.data.slice(2 + 64*2, 2 + 64*3); // 3rd word
+    const liquidityRate = BigInt(rateHex);
     const aaveApr = Number(liquidityRate) / 1e27 * 100;
-    const vaultApy = (aaveApr * 0.70 * 0.98); // 70% allocation, 2% fee
-    return vaultApy.toFixed(2);
+    const vaultApy = (aaveApr * 0.70 * 0.98);
+    if (vaultApy > 0 && vaultApy < 50) return vaultApy.toFixed(2);
+    return "~2.20";
   } catch {
     return "~2.20";
   }

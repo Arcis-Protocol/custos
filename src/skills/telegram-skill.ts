@@ -82,6 +82,7 @@ export class TelegramSkill implements Skill {
       await this.send(chatId, [
         `*Vault*`, ``, `TVL: ${fmtUSDC(totalAssets)}`,
         `Rate: ${(Number(rate) / 1e24).toFixed(6)} USDC/share`,
+        `APY: ${await getVaultAPY()}% (Aave V3)`,
         `Cap: ${fmtUSDC(cap)} (${util}% filled)`,
         `Reserve: ${fmtUSDC(reserve)} | Deployed: ${fmtUSDC(deployed)}`,
       ].join("\n"));
