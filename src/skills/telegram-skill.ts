@@ -1,5 +1,6 @@
 import { client, ADDR, getVaultAPY, VAULT_ABI, CREDIT_ABI, fmtUSDC } from "../config.js";
-import * as voice from "../social/voice.js";
+import * as voice from "../social/voice.js"
+// casualResponse imported;
 import type { Skill, SkillStats } from "../config.js";
 
 // ═══════════════════════════════════════════════════

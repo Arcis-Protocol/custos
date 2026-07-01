@@ -2,28 +2,35 @@
 //  CUSTOS VOICE — Personality & Response Generation
 // ═══════════════════════════════════════════════════
 
-// CUSTOS speaks as a protocol agent, not a chatbot.
-// Terse. Declarative. Data-first. Latin sparingly.
-// Never promotional. Never excited. Reports facts.
+// CUSTOS is a protocol keeper — knowledgeable, calm, helpful.
+// Speaks with authority but not aggression.
+// Data-first. Conversational when appropriate. Latin sparingly.
+// Never promotional. Reports facts. Welcomes questions.
 
 const GREETINGS = [
-  "Custos vigil.",
-  "The keeper watches.",
-  "The citadel stands.",
-  "Custos operatur.",
+  "Welcome to the citadel. Type /help to see what I can do.",
+  "The keeper is here. Ask me anything about the protocol.",
+  "Welcome. I monitor the vaults, credit lines, and bonds. How can I help?",
+  "Custos at your service. Try /status for a protocol overview.",
 ];
 
 const SIGN_OFFS = [
   "Vigilia aeterna.",
   "The keeper watches.",
   "Custos nunquam dormit.",
-  "Fortis pecunia machinae.",
 ];
 
 const UNKNOWN = [
-  "That query falls outside the citadel's walls.",
-  "Custos monitors the protocol. Ask about vault, credit, or bonds.",
-  "I watch the treasury, not the market. Ask /status.",
+  "I'm focused on the Arcis protocol — try /status, /vault, /credit, /bonds, or /token for what I track.",
+  "Not sure about that one. Try /help to see all my commands.",
+  "That's outside my scope, but I'm happy to help with protocol data. Try /help.",
+  "I track the vaults, credit, and bonds. Type /help to see what I can answer.",
+];
+
+const CASUAL = [
+  "Hey! The citadel is operational. Try /status for the latest.",
+  "What's up. The keeper is online. Need anything?",
+  "All systems running. Ask me about the protocol anytime.",
 ];
 
 export function greeting(): string {
@@ -38,16 +45,21 @@ export function unknownQuery(): string {
   return pick(UNKNOWN);
 }
 
+export function casualResponse(): string {
+  return pick(CASUAL);
+}
+
 // Format a keeper action report for social posting
 export function actionReport(action: string, detail: string): string {
   return `${action}. ${detail}`;
 }
 
 // Format a status report for X (280 char limit)
-export function xStatus(tvl: string, rate: string, util: string, actions: number, uptime: string): string {
+export function xStatus(tvl: string, rate: string, util: string, apy: string, actions: number, uptime: string): string {
   return [
     `Vault TVL: ${tvl}`,
     `Rate: ${rate} USDC/raUSDC`,
+    `APY: ${apy}% (Aave V3)`,
     `Credit util: ${util}`,
     ``,
     `Keeper: ${actions} actions | Up: ${uptime}`,
@@ -75,14 +87,15 @@ export function xAlert(level: string, message: string): string {
 // Format a thesis comment for X
 export function xThesis(): string {
   const theses = [
-    "69K+ agents hold capital on-chain. Zero financial instruments designed for them. That gap is Arcis.",
-    "$27B in tokenized RWA. 8-12% of DeFi volume from agents. The infrastructure isn't ready. We're building it.",
+    "104K+ agents hold capital on-chain. Zero financial instruments designed for them. That gap is Arcis.",
+    "$27.6B in tokenized RWA. 8-12% of DeFi volume from agents. The infrastructure isn't ready. We're building it.",
     "Not agents as assets. Assets for agents. Three functions: deposit, withdraw, balance. The ATI standard.",
-    "AI agents need yield on idle capital. Not a dashboard. Not a wallet connect flow. A three-function API.",
+    "AI agents need yield on idle capital. Not a dashboard. Not a wallet connect flow. Three smart contract calls.",
     "Every protocol needs a keeper. CUSTOS harvests yield, monitors loans, services bonds. Autonomously.",
     "The ATI is an open standard. deposit(). withdraw(). balance(). Any agent framework. No gatekeepers.",
     "DeFi was built for humans clicking dashboards. Agent DeFi is built for machines calling functions.",
-    "Agents earn 0% on idle USDC in EOA wallets. The citadel changes that.",
+    "Agents earn 0% on idle USDC. The citadel changes that. ~3.2% APY through Aave V3.",
+    "$CUSTOS is tokenized on Virtuals. Not a chatbot — an economic actor operating live DeFi infrastructure.",
   ];
   return pick(theses);
 }
