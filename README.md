@@ -2,7 +2,7 @@
 
 **The Keeper of the Citadel.**
 
-Autonomous keeper and community agent for Arcis Protocol. Live on Base mainnet. 7 contracts deployed. 9 skills. Harvests yield, monitors health, services debt, engages community, posts insights, and narrates protocol operations.
+Autonomous keeper and community agent for Arcis Protocol. Live on Base mainnet. 7 contracts deployed. 15 skills. Harvests yield, monitors health, services debt, guards the reserve and its own gas, tracks realized APY, discovers ATI-compliant peers, engages community, posts insights, and narrates protocol operations.
 
 ---
 
@@ -13,6 +13,12 @@ Autonomous keeper and community agent for Arcis Protocol. Live on Base mainnet. 
 | VaultKeeper | 5 min | harvest, rebalance, TVL monitoring, invariant checks |
 | CreditKeeper | 1 min | loan scanning, liquidation, utilization alerts |
 | BondKeeper | 10 min | serviceDebt, depositPrincipal, default detection |
+| VaultFactoryKeeper | 5 min | agent-vault registry watch — new & paused vaults |
+| APYReporter | 15 min | realized APY from exchangeRate deltas (EMA-smoothed) |
+| ReserveHealthKeeper | 5 min | liquid reserve-ratio guard — protects instant withdrawals |
+| GasSentinel | 10 min | keeper wallet native-ETH balance watch |
+| PeerRegistryKeeper | 30 min | probes ATI-compliance, emits a discovery beacon |
+| TreasuryDigest | 1 hour | whole-protocol snapshot, posts to X twice daily |
 | StatusReporter | 1 hour | aggregated multi-skill protocol summary |
 
 ## Social Skills
@@ -74,7 +80,7 @@ Missing credentials disable individual skills gracefully.
 
 ```
 src/
-  index.ts                  — orchestrator (9 skills)
+  index.ts                  — orchestrator (15 skills)
   config.ts                 — ABIs, client, Skill interface
   skills/
     vault-keeper.ts         — harvest, rebalance, TVL
