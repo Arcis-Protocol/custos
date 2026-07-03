@@ -1,4 +1,4 @@
-import { client, ADDR, VAULT_ABI, CREDIT_ABI, FACTORY_ABI, fmtUSDC, fmtDuration } from "../config.js";
+import { client, ADDR, VAULT_ABI, CREDIT_ABI, FACTORY_ABI, fmtUSDC, fmtDuration, getVaultAPY } from "../config.js";
 import * as voice from "./voice.js";
 import crypto from "crypto";
 
@@ -100,8 +100,9 @@ async function postStatus() {
     const util = total > 0n ? (Number(borrowed * 10000n / total) / 100).toFixed(1) : "0.0";
     const rateStr = supply > 0n ? (Number(rate) / 1e18).toFixed(6) : "1.000000";
     const uptime = fmtDuration(Date.now() - startTime);
+    const apy = await getVaultAPY();
 
-    const text = voice.xStatus(fmtUSDC(totalAssets), rateStr, `${util}%`, postCount, uptime);
+    const text = voice.xStatus(fmtUSDC(totalAssets), rateStr, `${util}%`, apy, postCount, uptime);
     await post(text);
   } catch (e: any) {
     console.error("[X] Status fetch failed:", e.message?.slice(0, 60));

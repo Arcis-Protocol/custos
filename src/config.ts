@@ -83,7 +83,7 @@ export const client: PublicClient = createPublicClient({
 
 const PRIVATE_KEY = process.env.CUSTOS_PRIVATE_KEY as `0x${string}` | undefined;
 
-export function getWallet(): WalletClient | null {
+export function getWallet() {
   if (!PRIVATE_KEY) return null;
   const account = privateKeyToAccount(PRIVATE_KEY);
   return createWalletClient({ chain: base, transport: http(RPC_URL), account });
