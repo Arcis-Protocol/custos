@@ -23,6 +23,9 @@ export class TelegramSkill implements Skill {
   private uniqueUsers = new Set<number>();
   private lastUpdateId = 0;
   private running = false;
+  private treasury: { statusText(): Promise<string>; triggerOnce(): Promise<any>; pause(): void; resume(): void; isPaused(): boolean } | null = null;
+
+  setTreasury(t: any) { this.treasury = t; }
 
   private async send(chatId: string | number, text: string) {
     try {
@@ -280,6 +283,18 @@ export class TelegramSkill implements Skill {
     ].join("\n"));
   }
 
+  private async cmdTreasury(chatId: string | number, text: string) {
+    if (!this.treasury) return this.send(chatId, "Treasury module not wired.");
+    const arg = text.split(/\s+/)[1]?.toLowerCase();
+    if (arg === "pause") { this.treasury.pause(); return this.send(chatId, "⏸ Treasury accumulation *paused*."); }
+    if (arg === "resume") { this.treasury.resume(); return this.send(chatId, "▶️ Treasury accumulation *resumed*."); }
+    if (arg === "now" || arg === "run") {
+      const r = await this.treasury.triggerOnce();
+      return this.send(chatId, `Cycle: *${r.action}*${r.reason ? `\n${r.reason}` : ""}`);
+    }
+    return this.send(chatId, await this.treasury.statusText());
+  }
+
   private async cmdWhitepaper(chatId: string | number) {
     await this.send(chatId, [
       `*Arcis Protocol Whitepaper v1.0*`, ``,
@@ -347,6 +362,7 @@ export class TelegramSkill implements Skill {
         else if (text.startsWith("/credit")) await this.cmdCredit(chatId);
         else if (text.startsWith("/bonds")) await this.cmdBonds(chatId);
         else if (text.startsWith("/ati")) await this.cmdAti(chatId);
+        else if (text.startsWith("/treasury")) await this.cmdTreasury(chatId, text);
         else if (text.startsWith("/token") || text.startsWith("/price")) await this.cmdToken(chatId);
         else if (text.startsWith("/buy")) await this.cmdBuy(chatId);
         else if (text.startsWith("/whitepaper") || text.startsWith("/wp")) await this.cmdWhitepaper(chatId);
@@ -374,6 +390,7 @@ export class TelegramSkill implements Skill {
           { command: "requestvault", description: "Request a vault for your agent token" },
           { command: "credit", description: "Credit pool and utilization" },
           { command: "bonds", description: "Bond factory status" },
+          { command: "treasury", description: "Agentic treasury: accumulation + graduation progress" },
           { command: "token", description: "$CUSTOS token info and links" },
           { command: "price", description: "Token contract and trade links" },
           { command: "buy", description: "How to buy $CUSTOS" },

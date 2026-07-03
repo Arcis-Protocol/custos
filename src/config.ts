@@ -24,6 +24,7 @@ export const ADDR = {
   bondFactory: "0xeb65d8bb08e0ea4a6bb9162d53d1b444f99681ba" as Address,
   identity: "0xaa4da295dd368c0f10128654af76e3f002e20e71" as Address,
   custosToken: "0xD7C479F720b0bC2FF1088A16D1c06C3e11C62882" as Address,
+  custosVault: "0x533896C48b676C0266b25e52fB0BebCd888478a7" as Address, // raCUSTOS — ERC-4626-style Arcis vault, asset = $CUSTOS
   factory: "0x9f5697eEB94ee1C7CEDfEb2080A9398D42170FBC" as Address,
 };
 

@@ -13,6 +13,7 @@ import { TreasuryDigest } from "./skills/treasury-digest.js";
 import { ReserveHealthKeeper } from "./skills/reserve-health-keeper.js";
 import { GasSentinel } from "./skills/gas-sentinel.js";
 import { PeerRegistryKeeper } from "./skills/peer-registry-keeper.js";
+import { TreasuryAccumulator } from "./skills/treasury-accumulator.js";
 
 // Social Skills
 import { TelegramSkill } from "./skills/telegram-skill.js";
@@ -23,7 +24,7 @@ import { EngagementSkill } from "./skills/engagement-skill.js";
 
 // ═══════════════════════════════════════════════════
 //  CUSTOS — The Keeper of the Citadel
-//  15 Skills. Autonomous protocol agent.
+//  16 Skills. Autonomous protocol agent.
 // ═══════════════════════════════════════════════════
 
 // ── Intervals ──
@@ -42,6 +43,7 @@ const DIGEST_INT = 3_600_000;   // 1 hour (protocol snapshot)
 const RESERVE_INT = 300_000;    // 5 min (reserve ratio guard)
 const GAS_INT = 600_000;        // 10 min (keeper gas watch)
 const PEERS_INT = 1_800_000;    // 30 min (ATI discovery beacon)
+const TREASURY_INT = 1_800_000; // 30 min (agentic treasury accumulation cycle)
 
 // ── Skills ──
 const vaultKeeper = new VaultKeeper();
@@ -59,10 +61,12 @@ const treasuryDigest = new TreasuryDigest();
 const reserveHealthKeeper = new ReserveHealthKeeper();
 const gasSentinel = new GasSentinel();
 const peerRegistryKeeper = new PeerRegistryKeeper();
+const treasuryAccumulator = new TreasuryAccumulator();
 
 // Wire cross-skill connections
-const allSkills = [vaultKeeper, creditKeeper, bondKeeper, statusReporter, vaultFactoryKeeper, apyReporter, treasuryDigest, reserveHealthKeeper, gasSentinel, peerRegistryKeeper, telegramSkill, xSkill, narratorSkill, insightSkill, engagementSkill];
+const allSkills = [vaultKeeper, creditKeeper, bondKeeper, statusReporter, vaultFactoryKeeper, apyReporter, treasuryDigest, reserveHealthKeeper, gasSentinel, peerRegistryKeeper, treasuryAccumulator, telegramSkill, xSkill, narratorSkill, insightSkill, engagementSkill];
 statusReporter.registerSkills(allSkills);
+telegramSkill.setTreasury(treasuryAccumulator);
 narratorSkill.setXSkill(xSkill);
 insightSkill.setXSkill(xSkill);
 engagementSkill.setXSkill(xSkill);
@@ -108,6 +112,7 @@ async function main() {
     ReserveHealth   ${RESERVE_INT / 1000}s     liquid reserve guard
     GasSentinel     ${GAS_INT / 1000}s     keeper gas watch
     PeerRegistry    ${PEERS_INT / 1000}s  ATI discovery beacon
+    TreasuryAcc     ${TREASURY_INT / 1000}s  accumulate -> vault -> credit
 
   Social Skills:
     TelegramSkill   ${TELEGRAM_INT / 1000}s       interactive bot
@@ -131,6 +136,7 @@ async function main() {
   await reserveHealthKeeper.run();
   await gasSentinel.run();
   await peerRegistryKeeper.run();
+  await treasuryAccumulator.run();
 
   // Start all loops
   setInterval(() => vaultKeeper.run(), VAULT_INT);
@@ -147,6 +153,7 @@ async function main() {
   setInterval(() => reserveHealthKeeper.run(), RESERVE_INT);
   setInterval(() => gasSentinel.run(), GAS_INT);
   setInterval(() => peerRegistryKeeper.run(), PEERS_INT);
+  setInterval(() => treasuryAccumulator.run(), TREASURY_INT);
 
   // X starts after 5 min delay (prevent restart spam)
   setTimeout(() => {
@@ -154,7 +161,7 @@ async function main() {
     setInterval(() => xSkill.run(), X_INT);
   }, 300_000);
 
-  await alert(`CUSTOS online. 15 skills active.\nMode: ${hasWriteAccess() ? "KEEPER" : "MONITOR"}\nTelegram: ${tg} | X: ${xm}`, "INFO");
+  await alert(`CUSTOS online. 16 skills active.\nMode: ${hasWriteAccess() ? "KEEPER" : "MONITOR"}\nTelegram: ${tg} | X: ${xm}`, "INFO");
 
   console.log("  Custos is watching.\n");
 }
