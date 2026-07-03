@@ -9,6 +9,7 @@ import type { Skill, SkillStats } from "../config.js";
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN || "";
 const API = `https://api.telegram.org/bot${BOT_TOKEN}`;
+const ADMIN_CHAT = process.env.TELEGRAM_CHAT_ID || "778984821"; // owner — receives vault requests
 
 export class TelegramSkill implements Skill {
   name = "TelegramSkill";
@@ -35,6 +36,34 @@ export class TelegramSkill implements Skill {
     } catch (e: any) {
       this.errors++;
     }
+  }
+
+  // Send a message with inline buttons (used to notify the owner of vault requests).
+  private async sendWithButtons(chatId: string | number, text: string, buttons: { text: string; callback_data: string }[][]) {
+    try {
+      await fetch(`${API}/sendMessage`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: chatId, text, parse_mode: "Markdown", disable_web_page_preview: true,
+          reply_markup: { inline_keyboard: buttons },
+        }),
+      });
+    } catch { this.errors++; }
+  }
+
+  // Acknowledge a button tap + optionally edit the original message.
+  private async answerCallback(callbackId: string, chatId: string | number, messageId: number, newText: string) {
+    try {
+      await fetch(`${API}/answerCallbackQuery`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ callback_query_id: callbackId }),
+      });
+      await fetch(`${API}/editMessageText`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: chatId, message_id: messageId, text: newText, parse_mode: "Markdown", disable_web_page_preview: true }),
+      });
+    } catch { this.errors++; }
   }
 
   // ── Command Handlers ──
@@ -110,6 +139,62 @@ export class TelegramSkill implements Skill {
     } catch { await this.send(chatId, "Vault registry query failed."); }
   }
 
+  // Anyone can request a vault; the owner is notified with accept/decline buttons.
+  private async cmdRequestVault(chatId: string | number, text: string, from: any) {
+    // Parse a token address from the message
+    const match = text.match(/0x[a-fA-F0-9]{40}/);
+    if (!match) {
+      await this.send(chatId, "*Request an Agent Vault*\n\nSend the token contract address:\n`/requestvault 0xYourTokenAddress`\n\nThe keeper will review and, if approved, deploy a vault for your token.");
+      return;
+    }
+    const token = match[0];
+    const requester = from?.username ? `@${from.username}` : (from?.id ? `id:${from.id}` : "unknown");
+
+    // Confirm to the requester
+    await this.send(chatId, `Request received. Token \`${token}\` submitted to the keeper for review. You'll be notified once a decision is made.`);
+
+    // Notify the owner with inline buttons. callback_data carries token + requester chat.
+    const cb = (action: string) => `vault_${action}:${token}:${chatId}`;
+    await this.sendWithButtons(ADMIN_CHAT, [
+      `*New Agent Vault Request*`, ``,
+      `Token: \`${token}\``,
+      `From: ${requester}`,
+      `Chat: \`${chatId}\``, ``,
+      `[View token](https://basescan.org/token/${token})`,
+    ].join("\n"), [[
+      { text: "✓ Accept", callback_data: cb("accept") },
+      { text: "✗ Decline", callback_data: cb("decline") },
+    ]]);
+  }
+
+  // Handle the owner tapping Accept/Decline.
+  private async handleCallback(cbQuery: any) {
+    const data: string = cbQuery.data || "";
+    const fromId = String(cbQuery.from?.id || "");
+    const msg = cbQuery.message;
+    if (!msg) return;
+
+    // Only the owner may decide.
+    if (fromId !== String(ADMIN_CHAT)) {
+      await fetch(`${API}/answerCallbackQuery`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ callback_query_id: cbQuery.id, text: "Not authorized." }),
+      });
+      return;
+    }
+
+    const [tag, token, requesterChat] = data.split(":");
+    if (tag === "vault_accept") {
+      await this.answerCallback(cbQuery.id, msg.chat.id, msg.message_id,
+        `*Vault Request — ACCEPTED*\n\nToken: \`${token}\`\n\nNext: create the vault via dashboard or CLI:\n\`arcis vault create ${token} -k <key>\``);
+      if (requesterChat) await this.send(requesterChat, `Your vault request for \`${token}\` was *approved*. The vault will be deployed shortly. Watch /vaults for it to appear.`);
+    } else if (tag === "vault_decline") {
+      await this.answerCallback(cbQuery.id, msg.chat.id, msg.message_id,
+        `*Vault Request — DECLINED*\n\nToken: \`${token}\``);
+      if (requesterChat) await this.send(requesterChat, `Your vault request for \`${token}\` was reviewed but not approved at this time. Reach out if you'd like to discuss.`);
+    }
+  }
+
   private async cmdCredit(chatId: string | number) {
     try {
       const [pool, borrowed, loanCount] = await Promise.all([
@@ -158,6 +243,7 @@ export class TelegramSkill implements Skill {
       `/status  Protocol overview`,
       `/vault   TVL, rate, capacity`,
       `/vaults  Agent-token vaults`,
+      `/requestvault  Request a vault for your token`,
       `/credit  Lending pool`,
       `/bonds   Bond status`,
       `/ati     ATI spec`, ``,
@@ -237,6 +323,13 @@ export class TelegramSkill implements Skill {
 
       for (const update of data.result) {
         this.lastUpdateId = update.update_id;
+
+        // Handle inline-button taps (vault accept/decline)
+        if (update.callback_query) {
+          await this.handleCallback(update.callback_query);
+          continue;
+        }
+
         const msg = update.message;
         if (!msg?.text) continue;
 
@@ -249,6 +342,7 @@ export class TelegramSkill implements Skill {
 
         if (text.startsWith("/status")) await this.cmdStatus(chatId);
         else if (text.startsWith("/vaults")) await this.cmdVaults(chatId);
+        else if (text.startsWith("/requestvault") || text.startsWith("/request")) await this.cmdRequestVault(chatId, text, msg.from);
         else if (text.startsWith("/vault")) await this.cmdVault(chatId);
         else if (text.startsWith("/credit")) await this.cmdCredit(chatId);
         else if (text.startsWith("/bonds")) await this.cmdBonds(chatId);
@@ -277,6 +371,7 @@ export class TelegramSkill implements Skill {
           { command: "status", description: "Protocol overview (TVL, rate, APY)" },
           { command: "vault", description: "Vault TVL, rate, capacity" },
           { command: "vaults", description: "Agent-token vaults registry" },
+          { command: "requestvault", description: "Request a vault for your agent token" },
           { command: "credit", description: "Credit pool and utilization" },
           { command: "bonds", description: "Bond factory status" },
           { command: "token", description: "$CUSTOS token info and links" },
