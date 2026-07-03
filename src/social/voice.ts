@@ -123,7 +123,7 @@ export function xThesis(): string {
     "Every protocol needs a keeper. CUSTOS harvests yield, monitors loans, services bonds. Autonomously.",
     "The ATI is an open standard. deposit(). withdraw(). balance(). Any agent framework. No gatekeepers.",
     "DeFi was built for humans clicking dashboards. Agent DeFi is built for machines calling functions.",
-    "Agents earn 0% on idle USDC. The citadel changes that. ~3.2% APY through Aave V3.",
+    "Agents earn 0% on idle USDC. The citadel changes that. A variable APY through Aave V3.",
     "$CUSTOS is tokenized on Virtuals. Not a chatbot — an economic actor operating live DeFi infrastructure.",
   ];
   return pick(theses);
