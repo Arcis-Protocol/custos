@@ -84,6 +84,35 @@ export function xAlert(level: string, message: string): string {
   return `${icon} ${message}`;
 }
 
+// Format an agent-vaults registry post for X
+export function xVaults(count: number, firstSymbol: string): string {
+  const noun = count === 1 ? "vault" : "vaults";
+  const variants = [
+    [
+      `Any agent token can now have a vault.`,
+      ``,
+      `${count} agent ${noun} live on the factory. Deposit your token, receive a receipt, borrow against it.`,
+      ``,
+      `First: ${firstSymbol}. The citadel expands.`,
+    ],
+    [
+      `The vault factory is live.`,
+      ``,
+      `${count} agent-token ${noun} deployed. Same security stack as the flagship. Custody plus credit collateral for any token.`,
+      ``,
+      signOff(),
+    ],
+    [
+      `${firstSymbol} vault: live.`,
+      ``,
+      `Agent tokens deposit for custody and use the position as collateral — borrow without selling.`,
+      ``,
+      `Tres Functiones. Unum Foedus.`,
+    ],
+  ];
+  return pick(variants).join("\n");
+}
+
 // Format a thesis comment for X
 export function xThesis(): string {
   const theses = [

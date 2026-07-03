@@ -24,6 +24,7 @@ export const ADDR = {
   bondFactory: "0xeb65d8bb08e0ea4a6bb9162d53d1b444f99681ba" as Address,
   identity: "0xaa4da295dd368c0f10128654af76e3f002e20e71" as Address,
   custosToken: "0xD7C479F720b0bC2FF1088A16D1c06C3e11C62882" as Address,
+  factory: "0x9f5697eEB94ee1C7CEDfEb2080A9398D42170FBC" as Address,
 };
 
 export const EXPLORER = "https://basescan.org";
@@ -41,6 +42,16 @@ export const VAULT_ABI = [
   { name: "feeBps", type: "function", inputs: [], outputs: [{ type: "uint256" }], stateMutability: "view" },
   { name: "harvest", type: "function", inputs: [], outputs: [{ type: "uint256" }], stateMutability: "nonpayable" },
   { name: "rebalance", type: "function", inputs: [], outputs: [], stateMutability: "nonpayable" },
+] as const;
+
+export const FACTORY_ABI = [
+  { name: "vaultCount", type: "function", inputs: [], outputs: [{ type: "uint256" }], stateMutability: "view" },
+  { name: "vaultInfo", type: "function", inputs: [{ name: "index", type: "uint256" }], outputs: [
+    { name: "vault", type: "address" }, { name: "asset", type: "address" },
+    { name: "name", type: "string" }, { name: "symbol", type: "string" },
+    { name: "totalAssets", type: "uint256" }, { name: "depositCap", type: "uint256" },
+    { name: "paused", type: "bool" },
+  ], stateMutability: "view" },
 ] as const;
 
 export const CREDIT_ABI = [

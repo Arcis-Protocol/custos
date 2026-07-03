@@ -1,4 +1,4 @@
-import { client, ADDR, VAULT_ABI, CREDIT_ABI, fmtUSDC, fmtDuration } from "../config.js";
+import { client, ADDR, VAULT_ABI, CREDIT_ABI, FACTORY_ABI, fmtUSDC, fmtDuration } from "../config.js";
 import * as voice from "./voice.js";
 import crypto from "crypto";
 
@@ -113,18 +113,30 @@ async function postThesis() {
   await post(text);
 }
 
+async function postVaults() {
+  try {
+    const count = await client.readContract({ address: ADDR.factory, abi: FACTORY_ABI, functionName: "vaultCount" }) as bigint;
+    if (count === 0n) { await postStatus(); return; } // nothing to show yet
+    const first = await client.readContract({ address: ADDR.factory, abi: FACTORY_ABI, functionName: "vaultInfo", args: [0n] }) as readonly [string, string, string, string, bigint, bigint, boolean];
+    const symbol = first[3];
+    const text = voice.xVaults(Number(count), symbol);
+    await post(text);
+  } catch (e: any) {
+    console.error("[X] Vaults fetch failed:", e.message?.slice(0, 60));
+    await postStatus();
+  }
+}
+
 // ── Scheduler ──
 
 let postIndex = 0;
 
 async function scheduledPost() {
-  // Alternate between status updates and thesis posts
-  // Pattern: status, thesis, status, thesis...
-  if (postIndex % 2 === 0) {
-    await postStatus();
-  } else {
-    await postThesis();
-  }
+  // Rotate: status, thesis, status, vaults, ...
+  const mod = postIndex % 4;
+  if (mod === 0 || mod === 2) await postStatus();
+  else if (mod === 1) await postThesis();
+  else await postVaults();
   postIndex++;
 }
 

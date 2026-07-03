@@ -1,4 +1,4 @@
-import { client, ADDR, getVaultAPY, VAULT_ABI, CREDIT_ABI, fmtUSDC } from "../config.js";
+import { client, ADDR, getVaultAPY, VAULT_ABI, CREDIT_ABI, FACTORY_ABI, fmtUSDC } from "../config.js";
 import * as voice from "../social/voice.js"
 // casualResponse imported;
 import type { Skill, SkillStats } from "../config.js";
@@ -89,6 +89,27 @@ export class TelegramSkill implements Skill {
     } catch { await this.send(chatId, "Vault query failed."); }
   }
 
+  private async cmdVaults(chatId: string | number) {
+    try {
+      const count = await client.readContract({ address: ADDR.factory, abi: FACTORY_ABI, functionName: "vaultCount" }) as bigint;
+      if (count === 0n) {
+        await this.send(chatId, "*Agent Vaults*\n\nNo agent-token vaults yet. The flagship USDC vault is live — use /vault.");
+        return;
+      }
+      const lines: string[] = [`*Agent Vaults* (${count})`, ``];
+      for (let i = 0n; i < count; i++) {
+        const info = await client.readContract({ address: ADDR.factory, abi: FACTORY_ABI, functionName: "vaultInfo", args: [i] }) as readonly [string, string, string, string, bigint, bigint, boolean];
+        const [vault, , name, symbol, , , paused] = info;
+        lines.push(`*${symbol}* — ${name}`);
+        lines.push(`${paused ? "paused" : "active"} · [Basescan](https://basescan.org/address/${vault})`);
+        lines.push(``);
+      }
+      lines.push(`Any agent token can have a vault. Deposit → receive raTOKEN → use as credit collateral.`);
+      lines.push(`Create one: arcis.money/dashboard`);
+      await this.send(chatId, lines.join("\n"));
+    } catch { await this.send(chatId, "Vault registry query failed."); }
+  }
+
   private async cmdCredit(chatId: string | number) {
     try {
       const [pool, borrowed, loanCount] = await Promise.all([
@@ -136,6 +157,7 @@ export class TelegramSkill implements Skill {
       `*Protocol*`,
       `/status  Protocol overview`,
       `/vault   TVL, rate, capacity`,
+      `/vaults  Agent-token vaults`,
       `/credit  Lending pool`,
       `/bonds   Bond status`,
       `/ati     ATI spec`, ``,
@@ -226,6 +248,7 @@ export class TelegramSkill implements Skill {
         console.log(`[TG] ${msg.from?.username || "anon"}: ${text}`);
 
         if (text.startsWith("/status")) await this.cmdStatus(chatId);
+        else if (text.startsWith("/vaults")) await this.cmdVaults(chatId);
         else if (text.startsWith("/vault")) await this.cmdVault(chatId);
         else if (text.startsWith("/credit")) await this.cmdCredit(chatId);
         else if (text.startsWith("/bonds")) await this.cmdBonds(chatId);
@@ -253,6 +276,7 @@ export class TelegramSkill implements Skill {
         commands: [
           { command: "status", description: "Protocol overview (TVL, rate, APY)" },
           { command: "vault", description: "Vault TVL, rate, capacity" },
+          { command: "vaults", description: "Agent-token vaults registry" },
           { command: "credit", description: "Credit pool and utilization" },
           { command: "bonds", description: "Bond factory status" },
           { command: "token", description: "$CUSTOS token info and links" },
