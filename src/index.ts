@@ -7,6 +7,9 @@ import { VaultKeeper } from "./skills/vault-keeper.js";
 import { CreditKeeper } from "./skills/credit-keeper.js";
 import { BondKeeper } from "./skills/bond-keeper.js";
 import { StatusReporter } from "./skills/status-reporter.js";
+import { VaultFactoryKeeper } from "./skills/vault-factory-keeper.js";
+import { APYReporter } from "./skills/apy-reporter.js";
+import { TreasuryDigest } from "./skills/treasury-digest.js";
 
 // Social Skills
 import { TelegramSkill } from "./skills/telegram-skill.js";
@@ -17,7 +20,7 @@ import { EngagementSkill } from "./skills/engagement-skill.js";
 
 // ═══════════════════════════════════════════════════
 //  CUSTOS — The Keeper of the Citadel
-//  9 Skills. Autonomous protocol agent.
+//  12 Skills. Autonomous protocol agent.
 // ═══════════════════════════════════════════════════
 
 // ── Intervals ──
@@ -30,6 +33,9 @@ const X_INT = 14_400_000;       // 4 hours
 const NARRATOR_INT = 30_000;    // 30 sec (drain queue)
 const INSIGHT_INT = 3_600_000;  // 1 hour
 const ENGAGE_INT = 600_000;     // 10 min
+const FACTORY_INT = 300_000;    // 5 min (vault registry watch)
+const APY_INT = 900_000;        // 15 min (rate sampling)
+const DIGEST_INT = 3_600_000;   // 1 hour (protocol snapshot)
 
 // ── Skills ──
 const vaultKeeper = new VaultKeeper();
@@ -41,13 +47,17 @@ const xSkill = new XSkill();
 const narratorSkill = new NarratorSkill();
 const insightSkill = new InsightSkill();
 const engagementSkill = new EngagementSkill();
+const vaultFactoryKeeper = new VaultFactoryKeeper();
+const apyReporter = new APYReporter();
+const treasuryDigest = new TreasuryDigest();
 
 // Wire cross-skill connections
-const allSkills = [vaultKeeper, creditKeeper, bondKeeper, statusReporter, telegramSkill, xSkill, narratorSkill, insightSkill, engagementSkill];
+const allSkills = [vaultKeeper, creditKeeper, bondKeeper, statusReporter, vaultFactoryKeeper, apyReporter, treasuryDigest, telegramSkill, xSkill, narratorSkill, insightSkill, engagementSkill];
 statusReporter.registerSkills(allSkills);
 narratorSkill.setXSkill(xSkill);
 insightSkill.setXSkill(xSkill);
 engagementSkill.setXSkill(xSkill);
+treasuryDigest.setXSkill(xSkill);
 
 // ── Shutdown ──
 process.on("SIGINT", async () => {
@@ -83,6 +93,9 @@ async function main() {
     CreditKeeper    ${CREDIT_INT / 1000}s      loans, liquidation, utilization
     BondKeeper      ${BOND_INT / 1000}s    serviceDebt, depositPrincipal
     StatusReporter  ${STATUS_INT / 1000}s  protocol summary
+    FactoryKeeper   ${FACTORY_INT / 1000}s     agent-vault registry watch
+    APYReporter     ${APY_INT / 1000}s     realized APY tracking
+    TreasuryDigest  ${DIGEST_INT / 1000}s  whole-protocol snapshot
 
   Social Skills:
     TelegramSkill   ${TELEGRAM_INT / 1000}s       interactive bot
@@ -100,6 +113,9 @@ async function main() {
   await creditKeeper.run();
   await bondKeeper.run();
   await statusReporter.run();
+  await vaultFactoryKeeper.run();
+  await apyReporter.run();
+  await treasuryDigest.run();
 
   // Start all loops
   setInterval(() => vaultKeeper.run(), VAULT_INT);
@@ -110,6 +126,9 @@ async function main() {
   setInterval(() => narratorSkill.run(), NARRATOR_INT);
   setInterval(() => insightSkill.run(), INSIGHT_INT);
   setInterval(() => engagementSkill.run(), ENGAGE_INT);
+  setInterval(() => vaultFactoryKeeper.run(), FACTORY_INT);
+  setInterval(() => apyReporter.run(), APY_INT);
+  setInterval(() => treasuryDigest.run(), DIGEST_INT);
 
   // X starts after 5 min delay (prevent restart spam)
   setTimeout(() => {
@@ -117,7 +136,7 @@ async function main() {
     setInterval(() => xSkill.run(), X_INT);
   }, 300_000);
 
-  await alert(`CUSTOS online. 9 skills active.\nMode: ${hasWriteAccess() ? "KEEPER" : "MONITOR"}\nTelegram: ${tg} | X: ${xm}`, "INFO");
+  await alert(`CUSTOS online. 12 skills active.\nMode: ${hasWriteAccess() ? "KEEPER" : "MONITOR"}\nTelegram: ${tg} | X: ${xm}`, "INFO");
 
   console.log("  Custos is watching.\n");
 }
