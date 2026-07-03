@@ -1,4 +1,4 @@
-import { client, ADDR, BOND_ABI, getWallet, hasWriteAccess, fmtUSDC, alert, baseSepolia } from "../config.js";
+import { client, ADDR, BOND_ABI, getWallet, hasWriteAccess, fmtUSDC, alert, base } from "../config.js";
 import type { Skill, SkillStats } from "../config.js";
 
 export class BondKeeper implements Skill {
@@ -57,7 +57,7 @@ export class BondKeeper implements Skill {
               const hash = await wallet.writeContract({
                 address: ADDR.bondFactory!, abi: BOND_ABI,
                 functionName: "serviceDebt", args: [BigInt(i)],
-                chain: baseSepolia,
+                chain: base,
               });
               const receipt = await client.waitForTransactionReceipt({ hash });
               if (receipt.status === "success") {

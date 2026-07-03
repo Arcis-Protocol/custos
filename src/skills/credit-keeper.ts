@@ -1,4 +1,4 @@
-import { client, ADDR, CREDIT_ABI, getWallet, hasWriteAccess, fmtUSDC, alert, baseSepolia } from "../config.js";
+import { client, ADDR, CREDIT_ABI, getWallet, hasWriteAccess, fmtUSDC, alert, base } from "../config.js";
 import type { Skill, SkillStats } from "../config.js";
 
 interface LoanSnapshot {
@@ -97,7 +97,7 @@ export class CreditKeeper implements Skill {
               const hash = await wallet.writeContract({
                 address: ADDR.credit, abi: CREDIT_ABI,
                 functionName: "liquidate", args: [BigInt(i)],
-                chain: baseSepolia,
+                chain: base,
               });
               const receipt = await client.waitForTransactionReceipt({ hash });
               if (receipt.status === "success") {

@@ -5,7 +5,7 @@ import {
 import { privateKeyToAccount } from "viem/accounts";
 
 // ── Chain ──
-export const baseSepolia = defineChain({
+export const base = defineChain({
   id: 8453, name: "Base",
   nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
   rpcUrls: { default: { http: ["https://mainnet.base.org"] } },
@@ -76,7 +76,7 @@ export const BOND_ABI = [
 // ── Client ──
 const RPC_URL = process.env.BASE_RPC_URL || "https://mainnet.base.org";
 export const client: PublicClient = createPublicClient({
-  chain: baseSepolia,
+  chain: base,
   transport: http(RPC_URL),
   batch: { multicall: true },
 });
@@ -86,7 +86,7 @@ const PRIVATE_KEY = process.env.CUSTOS_PRIVATE_KEY as `0x${string}` | undefined;
 export function getWallet(): WalletClient | null {
   if (!PRIVATE_KEY) return null;
   const account = privateKeyToAccount(PRIVATE_KEY);
-  return createWalletClient({ chain: baseSepolia, transport: http(), account });
+  return createWalletClient({ chain: base, transport: http(RPC_URL), account });
 }
 
 export function hasWriteAccess(): boolean {

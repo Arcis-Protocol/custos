@@ -1,4 +1,4 @@
-import { client, ADDR, VAULT_ABI, getWallet, hasWriteAccess, fmtUSDC, alert, baseSepolia } from "../config.js";
+import { client, ADDR, VAULT_ABI, getWallet, hasWriteAccess, fmtUSDC, alert, base } from "../config.js";
 import type { Skill, SkillStats } from "../config.js";
 
 export class VaultKeeper implements Skill {
@@ -74,7 +74,7 @@ export class VaultKeeper implements Skill {
           const tvlBefore = totalAssets;
           const hash = await wallet.writeContract({
             address: ADDR.vault, abi: VAULT_ABI, functionName: "harvest",
-            chain: baseSepolia,
+            chain: base,
           });
           const receipt = await client.waitForTransactionReceipt({ hash });
           if (receipt.status === "success") {
