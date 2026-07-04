@@ -1,13 +1,22 @@
 {
   "name": "@arcisprotocol/custos",
   "version": "0.1.0",
-  "description": "CUSTOS — The Keeper of the Citadel. Autonomous DeFi agent for Arcis Protocol.",
+  "description": "CUSTOS \u2014 The Keeper of the Citadel. Autonomous DeFi agent for Arcis Protocol.",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
     "start": "tsx src/index.ts",
-    "build": "tsup src/index.ts --format esm --clean"
+    "build": "tsup src/index.ts --format esm --clean",
+    "acp": "tsx src/acp/provider.ts"
   },
-  "dependencies": { "viem": "^2.21.0" },
-  "devDependencies": { "tsx": "^4.19.0", "tsup": "^8.3.0", "typescript": "^5.6.0", "@types/node": "^22.0.0" }
+  "dependencies": {
+    "viem": "^2.21.0",
+    "@virtuals-protocol/acp-node-v2": "^2.0.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.0",
+    "@types/node": "^22.0.0"
+  }
 }
