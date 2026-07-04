@@ -11,8 +11,7 @@
     "acp:offerings": "tsx src/acp/emit-offerings.ts"
   },
   "dependencies": {
-    "viem": "^2.21.0",
-    "@virtuals-protocol/acp-node-v2": "^2.0.0"
+    "viem": "^2.21.0"
   },
   "devDependencies": {
     "tsx": "^4.19.0",
