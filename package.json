@@ -8,7 +8,8 @@
     "start": "tsx src/index.ts",
     "build": "tsup src/index.ts --format esm --clean",
     "acp": "tsx src/acp/provider.ts",
-    "acp:offerings": "tsx src/acp/emit-offerings.ts"
+    "acp:offerings": "tsx src/acp/emit-offerings.ts",
+    "graduator": "tsx src/graduator/index.ts"
   },
   "dependencies": {
     "viem": "^2.21.0"
