@@ -7,7 +7,8 @@
   "scripts": {
     "start": "tsx src/index.ts",
     "build": "tsup src/index.ts --format esm --clean",
-    "acp": "tsx src/acp/provider.ts"
+    "acp": "tsx src/acp/provider.ts",
+    "acp:offerings": "tsx src/acp/emit-offerings.ts"
   },
   "dependencies": {
     "viem": "^2.21.0",

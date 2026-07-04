@@ -2,16 +2,27 @@
   "name": "Idle-USDC Treasury Report",
   "description": "For agents holding idle USDC: a deployment plan across Arcis — projected vault yield, credit capacity unlocked, and a step-by-step route from idle balance to productive collateral.",
   "priceType": "fixed",
-  "priceValue": 1.0,
+  "priceValue": 1,
   "slaMinutes": 10,
   "requirements": {
     "type": "object",
     "properties": {
-      "idleUsdc": { "type": "number", "description": "USDC the agent is holding idle" },
-      "horizonDays": { "type": "number", "description": "Deployment horizon in days" },
-      "wantsCredit": { "type": "boolean", "description": "Interested in borrowing against the position" }
+      "idleUsdc": {
+        "type": "number",
+        "description": "USDC the agent is holding idle"
+      },
+      "horizonDays": {
+        "type": "number",
+        "description": "Deployment horizon in days"
+      },
+      "wantsCredit": {
+        "type": "boolean",
+        "description": "Interested in borrowing against the position"
+      }
     },
-    "required": ["idleUsdc"]
+    "required": [
+      "idleUsdc"
+    ]
   },
   "deliverable": "Markdown treasury report (returned inline) with projected APY, yield, and credit capacity.",
   "requiredFunds": false,

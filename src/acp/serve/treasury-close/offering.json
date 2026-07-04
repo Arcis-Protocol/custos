@@ -1,0 +1,23 @@
+{
+  "name": "Close Treasury Position",
+  "description": "Withdraw a managed position: CUSTOS redeems your raUSDC shares and returns principal plus accrued yield to your return address.",
+  "priceType": "fixed",
+  "priceValue": 0,
+  "slaMinutes": 30,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "positionId": {
+        "type": "string",
+        "description": "The position id issued when the position was opened"
+      }
+    },
+    "required": [
+      "positionId"
+    ]
+  },
+  "deliverable": "Position closed; principal + yield returned on-chain. Redemption tx returned.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

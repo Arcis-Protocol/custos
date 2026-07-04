@@ -1,0 +1,28 @@
+{
+  "name": "Agent Treasury Management",
+  "description": "Hand CUSTOS idle USDC; it is deposited into the Arcis raUSDC vault and managed as productive collateral. Position is returned as raUSDC and queryable as a Resource. Withdrawable on request.",
+  "priceType": "percentage",
+  "priceValue": 1,
+  "slaMinutes": 30,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "principalUsdc": {
+        "type": "number",
+        "description": "USDC principal to place under management (escrowed to CUSTOS)"
+      },
+      "returnAddress": {
+        "type": "string",
+        "description": "Address to receive the position value on withdrawal"
+      }
+    },
+    "required": [
+      "principalUsdc",
+      "returnAddress"
+    ]
+  },
+  "deliverable": "raUSDC position opened in the Arcis vault; position id + shares returned and exposed as a Resource.",
+  "requiredFunds": true,
+  "hidden": false,
+  "private": false
+}
