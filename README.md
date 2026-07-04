@@ -2,7 +2,7 @@
 
 **The Keeper of the Citadel.**
 
-Autonomous keeper and community agent for Arcis Protocol. Live on Base mainnet. 7 contracts deployed. 15 skills. Harvests yield, monitors health, services debt, guards the reserve and its own gas, tracks realized APY, discovers ATI-compliant peers, engages community, posts insights, and narrates protocol operations.
+Autonomous keeper and community agent for Arcis Protocol. Live on Base mainnet. 7 contracts deployed. 17 skills. **Now live on Virtuals ACP** — earns USDC selling treasury services to other agents, then routes it into the Arcis vault to build on-chain credit. Harvests yield, monitors health, services debt, guards the reserve and its own gas, tracks realized APY, discovers ATI-compliant peers, engages community, posts insights, and narrates protocol operations.
 
 ---
 
@@ -30,6 +30,36 @@ Autonomous keeper and community agent for Arcis Protocol. Live on Base mainnet. 
 | NarratorSkill | 30 sec | real-time keeper action narration across channels |
 | InsightSkill | 1 hour | data-driven protocol insights, educational content |
 | EngagementSkill | 10 min | TVL milestones, ATH tracking, daily briefings |
+
+---
+
+## On Virtuals ACP
+
+CUSTOS is a live provider agent on the Virtuals Agent Commerce Protocol (ACP) — it sells
+treasury services to other agents and settles in USDC on-chain.
+
+| Offering | Price |
+|---|---|
+| Idle-USDC Treasury Check | free |
+| Idle-USDC Treasury Report | 1 USDC |
+| Vault Yield Snapshot | 0.5 USDC |
+| Agent Treasury Audit | 2 USDC |
+| Integration Walkthrough | 5 USDC |
+| Agent Treasury Management | 1% fee |
+
+Earned USDC routes into the Arcis raUSDC vault, building on-chain credit from real
+revenue — the thesis, self-applied. Runbook: `ACP.md`.
+
+## The Graduator
+
+A separate agent — its own hot wallet, own bounded book, own risk — that trades
+pre-graduation Virtuals agent tokens on their bonding curves. Ships OFF + dry-run.
+
+```bash
+npm run graduator   # dry-run paper-trades; flip GRADUATOR_DRY_RUN=false to go live
+```
+
+Runbook: `src/graduator/GRADUATOR.md`.
 
 ---
 
@@ -80,7 +110,7 @@ Missing credentials disable individual skills gracefully.
 
 ```
 src/
-  index.ts                  — orchestrator (15 skills)
+  index.ts                  — orchestrator (17 skills)
   config.ts                 — ABIs, client, Skill interface
   skills/
     vault-keeper.ts         — harvest, rebalance, TVL
@@ -92,8 +122,13 @@ src/
     narrator-skill.ts       — real-time keeper narration
     insight-skill.ts        — protocol insights, education
     engagement-skill.ts     — milestones, ATH, daily briefing
+    treasury-accumulator.ts — buy-and-hold $CUSTOS into the raCUSTOS vault
+    acp-treasury-router.ts  — route earned USDC into the raUSDC vault
   social/
     voice.ts                — on-brand personality module
+  treasury.ts               — Virtuals bonding-curve adapter
+  acp/                      — ACP provider, offerings, positions, bridge
+  graduator/                — The Graduator (pre-graduation token trader)
 ```
 
 ---
