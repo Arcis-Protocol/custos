@@ -1,0 +1,8 @@
+{
+  "name": "Arcis Managed Positions",
+  "description": "Read-only custody ledger for CUSTOS's Treasury Management service — AUM, caps, and every client position (shares, status, yield).",
+  "params": {
+    "type": "object",
+    "properties": { "positionId": { "type": "string", "description": "Optional — filter to one position" } }
+  }
+}

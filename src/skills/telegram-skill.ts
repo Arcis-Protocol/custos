@@ -1,4 +1,5 @@
 import { client, ADDR, getVaultAPY, VAULT_ABI, CREDIT_ABI, FACTORY_ABI, fmtUSDC } from "../config.js";
+import { positionsResource, closePosition } from "../acp/positions.js";
 import * as voice from "../social/voice.js"
 // casualResponse imported;
 import type { Skill, SkillStats } from "../config.js";
@@ -283,6 +284,28 @@ export class TelegramSkill implements Skill {
     ].join("\n"));
   }
 
+  private async cmdPositions(chatId: string | number, text: string) {
+    const arg = text.split(/\s+/).slice(1);
+    if (arg[0] === "close" && arg[1]) {
+      const r = await closePosition(arg[1]);
+      return this.send(chatId, r.ok
+        ? (r.dryRun ? `DRY RUN — ${r.reason}` : `Closed. Returned ${r.returnedUsdc?.toFixed(2)} USDC (yield ${r.yieldUsdc?.toFixed(2)}).`)
+        : `Could not close: ${r.reason}`);
+    }
+    const snap = await positionsResource();
+    const lines = [
+      `*Managed Positions — CUSTOS*`, ``,
+      `AUM: *${snap.aum.currentValueUsdc.toFixed(2)} USDC* across ${snap.aum.openPositions} open`,
+      `Principal: ${snap.aum.principalUsdc.toFixed(2)} · caps ${snap.caps.maxPerClientUsdc}/client, ${snap.caps.maxAumUsdc} AUM`, ``,
+    ];
+    const open = snap.positions.filter((p: any) => p.status === "open");
+    if (!open.length) lines.push("_No open positions._");
+    for (const p of open.slice(0, 15))
+      lines.push(`\`${p.id}\` · ${p.principalUsdc} USDC · ${p.raUsdcShares.toFixed(2)} raUSDC · ${p.client.slice(0, 10)}`);
+    lines.push("", "_/positions close <id> to force-redeem_");
+    return this.send(chatId, lines.join("\n"));
+  }
+
   private async cmdTreasury(chatId: string | number, text: string) {
     if (!this.treasury) return this.send(chatId, "Treasury module not wired.");
     const arg = text.split(/\s+/)[1]?.toLowerCase();
@@ -362,6 +385,7 @@ export class TelegramSkill implements Skill {
         else if (text.startsWith("/credit")) await this.cmdCredit(chatId);
         else if (text.startsWith("/bonds")) await this.cmdBonds(chatId);
         else if (text.startsWith("/ati")) await this.cmdAti(chatId);
+        else if (text.startsWith("/positions")) await this.cmdPositions(chatId, text);
         else if (text.startsWith("/treasury")) await this.cmdTreasury(chatId, text);
         else if (text.startsWith("/token") || text.startsWith("/price")) await this.cmdToken(chatId);
         else if (text.startsWith("/buy")) await this.cmdBuy(chatId);
@@ -390,6 +414,7 @@ export class TelegramSkill implements Skill {
           { command: "requestvault", description: "Request a vault for your agent token" },
           { command: "credit", description: "Credit pool and utilization" },
           { command: "bonds", description: "Bond factory status" },
+          { command: "positions", description: "Managed positions (AUM, per-client) + force-close" },
           { command: "treasury", description: "Agentic treasury: accumulation + graduation progress" },
           { command: "token", description: "$CUSTOS token info and links" },
           { command: "price", description: "Token contract and trade links" },

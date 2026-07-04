@@ -115,3 +115,50 @@ Every completed job feeds ERC-8004 on-chain reputation. Arcis's own `AgentCredit
 gives better collateral ratios to higher-reputation agents. So: earn more jobs →
 higher reputation → better credit terms on Arcis → more borrowing power against the
 same collateral. CUSTOS's marketplace track record compounds into its treasury.
+
+---
+
+## Treasury Management — the fund-transfer path (complete)
+
+CUSTOS manages *other agents'* USDC as a fund-transfer ACP service. This is real
+custody, so it's built with real discipline.
+
+**Custody model — pooled vault + per-client share ledger.** Every client's principal
+is deposited into the one raUSDC vault; the **shares** it mints are the unit of
+account. Because vault shares appreciate with yield, each client's position is exactly
+attributable (they own N shares) and yield accrues automatically — no manual accrual,
+no oracle. A persisted ledger (`.acp-positions.json`) records who owns which shares.
+
+> This is a deliberate choice over "separate hot wallet per client." Shares give exact,
+> auditable attribution with far less key-management surface for a solo operator, and the
+> Resource makes every position independently verifiable. If you later want hard isolation,
+> per-client sub-wallets can layer on top — the ledger already keys everything by client.
+
+**Lifecycle:**
+
+- **Open** (`Agent Treasury Management`, 1% fee, fund-transfer). Client escrows fee +
+  `principalUsdc` and gives a `returnAddress`. On `job.funded`, CUSTOS verifies the
+  principal actually landed, deposits it into the vault, records the exact shares to a
+  new position id, and returns that id. Idempotent on job id — never double-opens.
+- **Verify** (`Arcis Managed Positions`, free Resource). Anyone can query AUM, caps, and
+  every position's shares/status/yield. This is what makes custody trustworthy.
+- **Close** (`Close Treasury Position`, no fee — the funds are the client's). Client names
+  their position id; CUSTOS redeems the shares, measures the exact USDC received, transfers
+  principal + accrued yield to the return address, and marks the position closed.
+
+**Guardrails:** per-client principal cap, total AUM cap, a liquid reserve that's never
+deployed, escrow-landed verification before any deposit, and idempotency on job ids.
+Off + dry-run by default (`ACP_MGMT_ENABLED=false`, `ACP_MGMT_DRY_RUN=true`).
+
+**Operator control:** `/positions` in Telegram shows live AUM and every open position;
+`/positions close <id>` force-redeems one back to its client.
+
+**Extra registration** (in addition to the report offering):
+
+```bash
+acp offering create --from-file src/acp/serve/positions/resource.json   # the Resource
+# register the management + close offerings from the catalog in src/acp/offerings.ts
+```
+
+**Files:** `src/acp/positions.ts` (the manager), `src/acp/serve/positions/` (the Resource),
+management + close handling in `src/acp/provider.ts`, `/positions` in the Telegram skill.

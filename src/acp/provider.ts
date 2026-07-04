@@ -32,6 +32,7 @@ import { base } from "@account-kit/infra";
 import { alert } from "../config.js";
 import { TREASURY_REPORT, TREASURY_MANAGEMENT } from "./offerings.js";
 import { routeEarnings, bridgeTxUrl } from "./bridge.js";
+import { openPosition, closePosition, positionsResource } from "./positions.js";
 import treasuryReportHandler from "./serve/treasury-report/handler.js";
 
 const CHAIN_ID = 8453; // Base mainnet
@@ -59,24 +60,48 @@ async function buildProvider() {
 
 // Price a job from the requirement it arrived with.
 function priceFor(offeringName: string, req: any): number {
-  if (offeringName.toLowerCase().includes("management")) {
-    const principal = Number(req?.idleUsdc || req?.principal || 0);
+  const n = offeringName.toLowerCase();
+  if (n.includes("close")) return 0;                 // exit is free — funds are the client's
+  if (n.includes("management")) {
+    const principal = Number(req?.principalUsdc || req?.principal || 0);
     return Math.max(0.5, principal * (TREASURY_MANAGEMENT.priceValue / 100)); // 1% mgmt fee, floor 0.5
   }
-  return TREASURY_REPORT.priceValue; // fixed 1 USDC
+  return TREASURY_REPORT.priceValue;                  // fixed 1 USDC report
 }
 
 // Do the work for a funded job.
 async function deliver(session: JobSession, req: any): Promise<string> {
-  const name = (session as any).offeringName || "";
-  if (name.toLowerCase().includes("management")) {
-    // Fund-transfer: the client's principal is escrowed to CUSTOS. Deposit it
-    // into Arcis on their behalf, then report the position.
-    const r = await routeEarnings();
-    return r.action === "deposit"
-      ? `Deposited ${r.deposited.toFixed(2)} USDC → ${r.sharesReceived.toFixed(2)} raUSDC. ${r.depositTx ? bridgeTxUrl(r.depositTx) : "(dry-run)"}`
-      : `Position prepared. ${r.reason || ""}`;
+  const n = ((session as any).offeringName || "").toLowerCase();
+
+  // Fund-transfer: open a managed raUSDC position with the escrowed principal.
+  if (n.includes("management")) {
+    const r = await openPosition({
+      jobId: String((session as any).jobId ?? (session as any).id),
+      client: String((session as any).clientAddress || (session as any).client || "unknown"),
+      returnAddress: req.returnAddress,
+      principalUsdc: Number(req.principalUsdc),
+    });
+    if (!r.ok) return `Could not open position: ${r.reason}`;
+    return r.dryRun
+      ? `DRY RUN — ${r.reason}`
+      : [
+          `Position opened: ${r.positionId}`,
+          `Principal: ${r.principalUsdc} USDC → ${r.sharesReceived?.toFixed(2)} raUSDC`,
+          r.openTx ? `tx: ${bridgeTxUrl(r.openTx)}` : "",
+          `Withdraw anytime via the "Close Treasury Position" offering with this position id.`,
+          `Position is queryable as a Resource.`,
+        ].filter(Boolean).join("\n");
   }
+
+  // Withdrawal: redeem the position, return principal + yield to the client.
+  if (n.includes("close")) {
+    const r = await closePosition(String(req.positionId));
+    if (!r.ok) return `Could not close: ${r.reason}`;
+    return r.dryRun
+      ? `DRY RUN — ${r.reason}`
+      : `Position closed. Returned ${r.returnedUsdc?.toFixed(2)} USDC (yield ${r.yieldUsdc?.toFixed(2)}). tx: ${r.closeTx ? bridgeTxUrl(r.closeTx) : ""}`;
+  }
+
   // Service-only report
   const { deliverable } = await treasuryReportHandler({ requirements: req });
   return deliverable;

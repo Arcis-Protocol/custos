@@ -61,12 +61,34 @@ export const TREASURY_MANAGEMENT: Offering = {
   requirements: {
     type: "object",
     properties: {
-      returnAddress: { type: "string", description: "Address to receive the raUSDC position / withdrawals" },
+      principalUsdc: { type: "number", description: "USDC principal to place under management (escrowed to CUSTOS)" },
+      returnAddress: { type: "string", description: "Address to receive the position value on withdrawal" },
     },
-    required: ["returnAddress"],
+    required: ["principalUsdc", "returnAddress"],
   },
-  deliverable: "raUSDC position opened in the Arcis vault; position details returned and exposed as a Resource.",
-  fundTransfer: true,          // moves the client's principal — separate hot wallet per client
+  deliverable: "raUSDC position opened in the Arcis vault; position id + shares returned and exposed as a Resource.",
+  fundTransfer: true,          // moves the client's principal — deposited into the vault, tracked per-client
+};
+
+// ── 2b. Close Treasury Position (service-only, no fee) ──
+// The withdrawal path. The client names their position id; CUSTOS redeems the
+// raUSDC shares and returns principal + accrued yield to the return address.
+export const TREASURY_CLOSE: Offering = {
+  id: "treasury-close",
+  name: "Close Treasury Position",
+  description: "Withdraw a managed position: CUSTOS redeems your raUSDC shares and returns principal plus accrued yield to your return address.",
+  priceType: "fixed",
+  priceValue: 0,               // no fee to exit — funds are the client's
+  slaMinutes: 30,
+  requirements: {
+    type: "object",
+    properties: {
+      positionId: { type: "string", description: "The position id issued when the position was opened" },
+    },
+    required: ["positionId"],
+  },
+  deliverable: "Position closed; principal + yield returned on-chain. Redemption tx returned.",
+  fundTransfer: false,
 };
 
 // ── 3. Vault Yield Snapshot (Resource — free, read-only) ──
@@ -80,7 +102,7 @@ export const VAULT_SNAPSHOT_RESOURCE = {
   params: { type: "object", properties: {} },
 };
 
-export const OFFERINGS: Offering[] = [TREASURY_REPORT, TREASURY_MANAGEMENT];
+export const OFFERINGS: Offering[] = [TREASURY_REPORT, TREASURY_MANAGEMENT, TREASURY_CLOSE];
 
 /** Serialize an offering to the JSON shape `acp offering create --from-file` expects. */
 export function toOfferingJson(o: Offering) {
