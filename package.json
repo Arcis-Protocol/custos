@@ -9,7 +9,8 @@
     "build": "tsup src/index.ts --format esm --clean",
     "acp": "tsx src/acp/provider.ts",
     "acp:offerings": "tsx src/acp/emit-offerings.ts",
-    "graduator": "tsx src/graduator/index.ts"
+    "graduator": "tsx src/graduator/index.ts",
+    "spectrum": "tsx src/spectrum-server.ts"
   },
   "dependencies": {
     "viem": "^2.21.0"
