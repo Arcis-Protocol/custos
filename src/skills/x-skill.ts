@@ -105,6 +105,11 @@ export class XSkill implements Skill {
     await this.post(voice.actionReport(action, detail));
   }
 
+  /** Post a fully-composed proof message (used by ProofSkill). Returns true if it hit X. */
+  async postProof(text: string): Promise<boolean> {
+    return this.post(text);
+  }
+
   stats(): SkillStats {
     return {
       name: this.name, runs: this.runs, actions: this.actions,

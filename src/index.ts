@@ -22,6 +22,7 @@ import { XSkill } from "./skills/x-skill.js";
 import { NarratorSkill } from "./skills/narrator-skill.js";
 import { InsightSkill } from "./skills/insight-skill.js";
 import { EngagementSkill } from "./skills/engagement-skill.js";
+import { ProofSkill } from "./skills/proof-skill.js";
 
 // ═══════════════════════════════════════════════════
 //  CUSTOS — The Keeper of the Citadel
@@ -35,6 +36,7 @@ const BOND_INT = 600_000;       // 10 min
 const STATUS_INT = 3_600_000;   // 1 hour
 const TELEGRAM_INT = 2_000;     // 2 sec (poll)
 const X_INT = 14_400_000;       // 4 hours
+const PROOF_INT = Number(process.env.PROOF_INTERVAL_MS) || 900_000;   // 15 min — proof cadence
 const NARRATOR_INT = 30_000;    // 30 sec (drain queue)
 const INSIGHT_INT = 3_600_000;  // 1 hour
 const ENGAGE_INT = 600_000;     // 10 min
@@ -54,6 +56,7 @@ const bondKeeper = new BondKeeper();
 const statusReporter = new StatusReporter();
 const telegramSkill = new TelegramSkill();
 const xSkill = new XSkill();
+const proofSkill = new ProofSkill(xSkill);
 const narratorSkill = new NarratorSkill();
 const insightSkill = new InsightSkill();
 const engagementSkill = new EngagementSkill();
@@ -67,7 +70,7 @@ const treasuryAccumulator = new TreasuryAccumulator();
 const acpTreasuryRouter = new ACPTreasuryRouter();
 
 // Wire cross-skill connections
-const allSkills = [vaultKeeper, creditKeeper, bondKeeper, statusReporter, vaultFactoryKeeper, apyReporter, treasuryDigest, reserveHealthKeeper, gasSentinel, peerRegistryKeeper, treasuryAccumulator, acpTreasuryRouter, telegramSkill, xSkill, narratorSkill, insightSkill, engagementSkill];
+const allSkills = [vaultKeeper, creditKeeper, bondKeeper, statusReporter, vaultFactoryKeeper, apyReporter, treasuryDigest, reserveHealthKeeper, gasSentinel, peerRegistryKeeper, treasuryAccumulator, acpTreasuryRouter, telegramSkill, xSkill, proofSkill, narratorSkill, insightSkill, engagementSkill];
 statusReporter.registerSkills(allSkills);
 telegramSkill.setTreasury(treasuryAccumulator);
 narratorSkill.setXSkill(xSkill);
@@ -142,6 +145,7 @@ async function main() {
   await peerRegistryKeeper.run();
   await treasuryAccumulator.run();
   await acpTreasuryRouter.run();
+  await proofSkill.run();
 
   // Start all loops
   setInterval(() => vaultKeeper.run(), VAULT_INT);
@@ -160,6 +164,7 @@ async function main() {
   setInterval(() => peerRegistryKeeper.run(), PEERS_INT);
   setInterval(() => treasuryAccumulator.run(), TREASURY_INT);
   setInterval(() => acpTreasuryRouter.run(), ACPROUTER_INT);
+  setInterval(() => proofSkill.run(), PROOF_INT);
 
   // X starts after 5 min delay (prevent restart spam)
   setTimeout(() => {
@@ -167,7 +172,7 @@ async function main() {
     setInterval(() => xSkill.run(), X_INT);
   }, 300_000);
 
-  await alert(`CUSTOS online. 17 skills active.\nMode: ${hasWriteAccess() ? "KEEPER" : "MONITOR"}\nTelegram: ${tg} | X: ${xm}`, "INFO");
+  await alert(`CUSTOS online. 18 skills active.\nMode: ${hasWriteAccess() ? "KEEPER" : "MONITOR"}\nTelegram: ${tg} | X: ${xm}`, "INFO");
 
   console.log("  Custos is watching.\n");
 }
