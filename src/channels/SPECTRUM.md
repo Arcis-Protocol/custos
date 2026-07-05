@@ -14,8 +14,7 @@ signature." All behavior + the money guardrail live in `channels/spectrum-brain.
 - **Test locally, no credentials:** `npm run spectrum` starts the `terminal`
   provider — type to CUSTOS right in your shell. Proves the whole loop, zero setup.
 - **Go live on iMessage:** create a project at app.photon.codes (managed iMessage
-  lines), set `PROJECT_ID` + `PROJECT_SECRET`; the iMessage provider turns on
-  automatically. Add WhatsApp/Telegram via `SPECTRUM_WHATSAPP` / `SPECTRUM_TELEGRAM`.
+  lines), set `PROJECT_ID` + `PROJECT_SECRET` and `SPECTRUM_IMESSAGE=true`; the iMessage provider turns on
 
 ## Phase 2 — non-custodial deposit (next)
 Text "deposit 500" → CUSTOS replies with a signing link / iMessage mini-app → you

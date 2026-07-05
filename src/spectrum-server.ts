@@ -1,49 +1,47 @@
 // @ts-nocheck — thin Spectrum transport shim. Types resolve after `npm install spectrum-ts`.
 // ═══════════════════════════════════════════════════════════════════════════
-//  spectrum-server.ts — CUSTOS on Spectrum (iMessage / WhatsApp / Telegram / terminal)
+//  spectrum-server.ts — CUSTOS on Spectrum (terminal / iMessage / …)
 //
 //  PHASE 1: READ-ONLY. Run:  npm run spectrum
 //
-//  • Local test, zero credentials: uses the `terminal` provider — just type in
-//    your terminal and CUSTOS replies. Proves the whole loop with no iMessage setup.
-//  • iMessage / WhatsApp: set PROJECT_ID + PROJECT_SECRET (from app.photon.codes,
-//    Photon's managed lines) and the provider(s) get added automatically below.
+//  • Local terminal test — ZERO credentials: no PROJECT_ID set ⇒ runs the
+//    `terminal` provider only. Type to CUSTOS right in your shell.
+//  • iMessage (managed lines) — set PROJECT_ID + PROJECT_SECRET from
+//    app.photon.codes and SPECTRUM_IMESSAGE=true.
 //
-//  The transport is deliberately dumb: it extracts the incoming text, hands it to
-//  answerReadOnly(), and sends the reply back. All behavior + the money guardrail
-//  live in channels/spectrum-brain.ts.
+//  All behavior + the money guardrail live in channels/spectrum-brain.ts.
 // ═══════════════════════════════════════════════════════════════════════════
 
 import { Spectrum } from "spectrum-ts";
-import { terminal, imessage, telegram, whatsapp } from "spectrum-ts/providers";
+import { terminal, imessage } from "spectrum-ts/providers";
 import { answerReadOnly } from "./channels/spectrum-brain.js";
 
+function extractText(message) {
+  const c = message?.content;
+  if (typeof c === "string") return c;
+  if (Array.isArray(c) && c[0]?.text) return c[0].text;      // legacy Content[]
+  if (c && typeof c === "object" && typeof c.text === "string") return c.text;
+  if (typeof message?.text === "string") return message.text;
+  return "";
+}
+
 async function main() {
-  const cloud = Boolean(process.env.PROJECT_ID && process.env.PROJECT_SECRET);
+  const projectId = process.env.PROJECT_ID;
+  const projectSecret = process.env.PROJECT_SECRET;
+  const cloud = Boolean(projectId && projectSecret);
 
   const providers = [terminal.config()];
-  if (cloud) {
-    providers.push(imessage.config());
-    if (process.env.SPECTRUM_WHATSAPP === "true") providers.push(whatsapp.config());
-    if (process.env.SPECTRUM_TELEGRAM === "true") providers.push(telegram.config());
-  }
+  if (cloud && process.env.SPECTRUM_IMESSAGE === "true") providers.push(imessage.config());
 
-  const app = await Spectrum({
-    projectId: process.env.PROJECT_ID || "local",
-    projectSecret: process.env.PROJECT_SECRET || "local",
-    providers,
-  });
+  // Cloud creds only when we actually have them; otherwise local terminal only.
+  const app = await Spectrum(cloud ? { projectId, projectSecret, providers } : { providers });
 
-  console.log(`CUSTOS on Spectrum \u2014 READ-ONLY (Phase 1). ${cloud ? "iMessage line active." : "Terminal only (no cloud creds)."} Type to CUSTOS:`);
+  console.log(`CUSTOS on Spectrum — READ-ONLY (Phase 1). ${cloud ? "cloud/iMessage" : "local terminal"} mode.`);
 
   for await (const [space, message] of app.messages) {
     try {
       if (message?.type && message.type !== "text") continue;
-      const text =
-        typeof message?.content === "string" ? message.content : (message?.content?.text ?? message?.text ?? "");
-
-      const reply = await answerReadOnly(text);
-
+      const reply = await answerReadOnly(extractText(message));
       if (space?.responding && typeof message?.reply === "function") {
         await space.responding(() => message.reply(reply));
       } else if (typeof message?.reply === "function") {
@@ -53,7 +51,7 @@ async function main() {
       }
     } catch (e) {
       console.error("spectrum message error:", e);
-      try { await space.send("Something went wrong reading that \u2014 try again in a moment."); } catch {}
+      try { await space.send("Something went wrong reading that — try again in a moment."); } catch {}
     }
   }
 }
