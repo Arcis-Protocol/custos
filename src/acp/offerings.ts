@@ -447,7 +447,38 @@ export const IDLE_MIGRATION: Offering = {
   fundTransfer: true,
 };
 
+// ═══════════════════════════════════════════════════════════════════════════
+//  FLAGSHIP — Managed Treasury subscription. The whole treasury stack, run by
+//  CUSTOS, billed monthly. Fulfilled by the TreasurySteward skill.
+// ═══════════════════════════════════════════════════════════════════════════
+export const MANAGED_TREASURY: Offering = {
+  id: "managed-treasury",
+  name: "Managed Treasury — CUSTOS Steward",
+  description:
+    "CUSTOS runs your entire treasury, autonomously — every treasury service in one subscription: idle-capital deployment, yield capture and live reward tracking, credit-headroom management, liquidity and reserve guarding, and continuous risk monitoring, with a digest every cycle. One line, the whole stack. Billed monthly in USDC; cancel anytime.",
+  priceType: "fixed",
+  priceValue: 250,            // USDC / month — flagship subscription
+  slaMinutes: 60,             // onboarding SLA; management is continuous thereafter
+  requirements: {
+    type: "object",
+    properties: {
+      agent: { type: "string", description: "Agent / wallet whose treasury CUSTOS will manage" },
+      treasuryUsdc: { type: "number", description: "Approximate treasury size under management (USDC)" },
+      liquidityFloorUsdc: { type: "number", description: "USDC to always keep liquid — never deployed" },
+      cadenceDays: { type: "number", description: "Digest cadence in days (default 1)" },
+      tier: { type: "string", enum: ["standard", "prime"], description: "Service tier — prime unlocks higher credit LTV (default standard)" },
+      billingPeriod: { type: "string", enum: ["monthly"], description: "Subscription billing period" },
+    },
+    required: ["agent"],
+  },
+  deliverable:
+    "An active managed-treasury subscription: continuous optimization and monitoring across yield, credit, and liquidity, with a per-cycle digest and immediate risk alerts. Renews monthly.",
+  fundTransfer: false,        // a management fee — principal stays in the client's control / managed in place
+};
+
 export const OFFERINGS: Offering[] = [
+  // ── Flagship subscription — the whole stack, managed ──
+  MANAGED_TREASURY,
   // ── Core (the original wedge + flagship) ──
   IDLE_CHECK, TREASURY_REPORT, VAULT_YIELD_SNAPSHOT, ATI_EXPLAINER, CREDIT_ESTIMATE,
   TVL_MILESTONE, TREASURY_AUDIT, INTEGRATION_WALKTHROUGH, TREASURY_MANAGEMENT, TREASURY_CLOSE,

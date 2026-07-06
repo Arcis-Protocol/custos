@@ -30,10 +30,13 @@ import {
 import type { JobSession, JobRoomEntry } from "@virtuals-protocol/acp-node-v2";
 import { base } from "@account-kit/infra";
 import { alert } from "../config.js";
-import { TREASURY_REPORT, TREASURY_MANAGEMENT } from "./offerings.js";
+import { TREASURY_REPORT, TREASURY_MANAGEMENT, MANAGED_TREASURY } from "./offerings.js";
 import { routeEarnings, bridgeTxUrl } from "./bridge.js";
 import { openPosition, closePosition, positionsResource } from "./positions.js";
 import treasuryReportHandler from "./serve/treasury-report/handler.js";
+import { TreasurySteward } from "../skills/treasury-steward.js";
+
+const steward = new TreasurySteward();
 
 const CHAIN_ID = 8453; // Base mainnet
 
@@ -62,6 +65,7 @@ async function buildProvider() {
 function priceFor(offeringName: string, req: any): number {
   const n = offeringName.toLowerCase();
   if (n.includes("close")) return 0;                 // exit is free — funds are the client's
+  if (n.includes("steward")) return MANAGED_TREASURY.priceValue; // 250 USDC / month subscription
   if (n.includes("management")) {
     const principal = Number(req?.principalUsdc || req?.principal || 0);
     return Math.max(0.5, principal * (TREASURY_MANAGEMENT.priceValue / 100)); // 1% mgmt fee, floor 0.5
@@ -100,6 +104,24 @@ async function deliver(session: JobSession, req: any): Promise<string> {
     return r.dryRun
       ? `DRY RUN — ${r.reason}`
       : `Position closed. Returned ${r.returnedUsdc?.toFixed(2)} USDC (yield ${r.yieldUsdc?.toFixed(2)}). tx: ${r.closeTx ? bridgeTxUrl(r.closeTx) : ""}`;
+  }
+
+  // Subscription: activate managed treasury and return the first digest.
+  if (n.includes("steward")) {
+    const agent = String(req.agent || (session as any).clientAddress || (session as any).client || "");
+    if (!/^0x[0-9a-fA-F]{40}$/.test(agent)) return "Managed Treasury needs a valid `agent` address to steward.";
+    steward.subscribe(agent, {
+      tier: req.tier === "prime" ? "prime" : "standard",
+      cadenceDays: Number(req.cadenceDays) || 1,
+      liquidityFloorUsdc: Number(req.liquidityFloorUsdc) || 0,
+    });
+    const digest = await steward.reportFor(agent);
+    return [
+      `Managed Treasury active — CUSTOS is now stewarding \`${agent}\`.`,
+      `Billed ${MANAGED_TREASURY.priceValue} USDC / month · cancel anytime.`,
+      ``,
+      digest,
+    ].join("\n");
   }
 
   // Service-only report

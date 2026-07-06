@@ -15,6 +15,7 @@ import { GasSentinel } from "./skills/gas-sentinel.js";
 import { PeerRegistryKeeper } from "./skills/peer-registry-keeper.js";
 import { TreasuryAccumulator } from "./skills/treasury-accumulator.js";
 import { ACPTreasuryRouter } from "./skills/acp-treasury-router.js";
+import { TreasurySteward } from "./skills/treasury-steward.js";
 
 // Social Skills
 import { TelegramSkill } from "./skills/telegram-skill.js";
@@ -48,6 +49,7 @@ const GAS_INT = 600_000;        // 10 min (keeper gas watch)
 const PEERS_INT = 1_800_000;    // 30 min (ATI discovery beacon)
 const TREASURY_INT = 1_800_000; // 30 min (agentic treasury accumulation cycle)
 const ACPROUTER_INT = 900_000;  // 15 min (route ACP-earned USDC into Arcis)
+const STEWARD_INT = 3_600_000;  // 1 hour (managed-treasury subscriber cycle)
 
 // ── Skills ──
 const vaultKeeper = new VaultKeeper();
@@ -68,6 +70,7 @@ const gasSentinel = new GasSentinel();
 const peerRegistryKeeper = new PeerRegistryKeeper();
 const treasuryAccumulator = new TreasuryAccumulator();
 const acpTreasuryRouter = new ACPTreasuryRouter();
+const treasurySteward = new TreasurySteward();
 
 // Wire cross-skill connections
 const allSkills = [vaultKeeper, creditKeeper, bondKeeper, statusReporter, vaultFactoryKeeper, apyReporter, treasuryDigest, reserveHealthKeeper, gasSentinel, peerRegistryKeeper, treasuryAccumulator, acpTreasuryRouter, telegramSkill, xSkill, proofSkill, narratorSkill, insightSkill, engagementSkill];
@@ -145,6 +148,7 @@ async function main() {
   await peerRegistryKeeper.run();
   await treasuryAccumulator.run();
   await acpTreasuryRouter.run();
+  await treasurySteward.run();
   await proofSkill.run();
 
   // Start all loops
@@ -164,6 +168,7 @@ async function main() {
   setInterval(() => peerRegistryKeeper.run(), PEERS_INT);
   setInterval(() => treasuryAccumulator.run(), TREASURY_INT);
   setInterval(() => acpTreasuryRouter.run(), ACPROUTER_INT);
+  setInterval(() => treasurySteward.run(), STEWARD_INT);
   setInterval(() => proofSkill.run(), PROOF_INT);
 
   // X starts after 5 min delay (prevent restart spam)
