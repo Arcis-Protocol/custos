@@ -10,7 +10,7 @@
     "acp": "tsx src/acp/provider.ts",
     "acp:offerings": "tsx src/acp/emit-offerings.ts",
     "graduator": "tsx src/graduator/index.ts",
-    "spectrum": "tsx src/spectrum-server.ts"
+    "spectrum": "tsx --env-file-if-exists=.env src/spectrum-server.ts"
   },
   "dependencies": {
     "spectrum-ts": "^8.2.1",
