@@ -1,0 +1,23 @@
+{
+  "name": "Know-Your-Agent (KYA) Check",
+  "description": "A trust read on a counterparty agent before you transact: identity-registry presence, ERC-8004 reputation tier, and treasury footprint.",
+  "priceType": "fixed",
+  "priceValue": 1,
+  "slaMinutes": 10,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "agent": {
+        "type": "string",
+        "description": "Counterparty agent to check"
+      }
+    },
+    "required": [
+      "agent"
+    ]
+  },
+  "deliverable": "KYA summary: identity, reputation tier, and on-chain treasury signals.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

@@ -1,0 +1,27 @@
+{
+  "name": "Idle-vs-Arcis Yield Comparison",
+  "description": "A side-by-side of what a USDC balance earns sitting idle versus deployed in the Arcis vault over a chosen horizon.",
+  "priceType": "fixed",
+  "priceValue": 0.5,
+  "slaMinutes": 10,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "usdc": {
+        "type": "number",
+        "description": "USDC balance to compare"
+      },
+      "horizonDays": {
+        "type": "number",
+        "description": "Comparison horizon"
+      }
+    },
+    "required": [
+      "usdc"
+    ]
+  },
+  "deliverable": "Idle vs. deployed yield table with the delta in USDC.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

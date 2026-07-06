@@ -1,0 +1,20 @@
+{
+  "name": "Forward APY Forecast",
+  "description": "A forward yield estimate for the Arcis vault derived from the live Aave V3 source rate, allocation weight, and fee — with the assumptions shown.",
+  "priceType": "fixed",
+  "priceValue": 0.5,
+  "slaMinutes": 10,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "horizonDays": {
+        "type": "number",
+        "description": "Forecast horizon in days"
+      }
+    }
+  },
+  "deliverable": "Projected net APY and USDC yield over the horizon, with the source-rate math.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

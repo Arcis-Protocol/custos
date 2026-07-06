@@ -1,0 +1,31 @@
+{
+  "name": "Borrow Simulation",
+  "description": "Simulate borrowing against an Arcis position: maximum draw, collateral ratio, indicative rate, and liquidation threshold — without executing.",
+  "priceType": "fixed",
+  "priceValue": 1,
+  "slaMinutes": 10,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "positionUsdc": {
+        "type": "number",
+        "description": "Position value to borrow against"
+      },
+      "agent": {
+        "type": "string",
+        "description": "Agent address for reputation"
+      },
+      "drawUsdc": {
+        "type": "number",
+        "description": "Intended borrow amount"
+      }
+    },
+    "required": [
+      "positionUsdc"
+    ]
+  },
+  "deliverable": "Simulated loan terms with health factor and liquidation point.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

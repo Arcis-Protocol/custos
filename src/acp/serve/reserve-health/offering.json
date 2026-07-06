@@ -1,0 +1,15 @@
+{
+  "name": "Vault Reserve Health Check",
+  "description": "A read on the vault's liquid reserve: reserve ratio, instant-withdrawal headroom, and how much could be pulled without touching strategies.",
+  "priceType": "fixed",
+  "priceValue": 0.5,
+  "slaMinutes": 5,
+  "requirements": {
+    "type": "object",
+    "properties": {}
+  },
+  "deliverable": "Reserve ratio, liquid headroom, and a liquidity verdict.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

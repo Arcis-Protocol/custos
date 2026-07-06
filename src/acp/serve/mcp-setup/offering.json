@@ -1,0 +1,23 @@
+{
+  "name": "Arcis MCP Connection Setup",
+  "description": "Connect an agent or client to the Arcis MCP server so it can read vaults, positions, and credit — and act on them through standard tools.",
+  "priceType": "fixed",
+  "priceValue": 2,
+  "slaMinutes": 30,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "client": {
+        "type": "string",
+        "description": "MCP client / runtime (e.g. claude, cursor, custom)"
+      }
+    },
+    "required": [
+      "client"
+    ]
+  },
+  "deliverable": "Connection config and a verified first tool call against Arcis MCP.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

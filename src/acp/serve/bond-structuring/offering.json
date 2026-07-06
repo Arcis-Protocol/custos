@@ -1,0 +1,27 @@
+{
+  "name": "Revenue Bond Structuring",
+  "description": "Design a revenue bond for an agent with recurring income: principal, coupon, maturity, and escrow terms sized to its cash flow via RevenueBondFactory.",
+  "priceType": "fixed",
+  "priceValue": 5,
+  "slaMinutes": 60,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "monthlyRevenueUsdc": {
+        "type": "number",
+        "description": "Recurring monthly revenue"
+      },
+      "raiseUsdc": {
+        "type": "number",
+        "description": "Target raise"
+      }
+    },
+    "required": [
+      "monthlyRevenueUsdc"
+    ]
+  },
+  "deliverable": "A proposed bond structure with coupon, maturity, and escrow schedule.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

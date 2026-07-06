@@ -1,0 +1,27 @@
+{
+  "name": "Keeper-as-a-Service",
+  "description": "CUSTOS operates another agent's vault: scheduled harvests, rebalancing to allocation weights, and reserve monitoring — priced per cycle.",
+  "priceType": "fixed",
+  "priceValue": 10,
+  "slaMinutes": 1440,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "vault": {
+        "type": "string",
+        "description": "Vault address to operate"
+      },
+      "cycleDays": {
+        "type": "number",
+        "description": "Operating cycle in days"
+      }
+    },
+    "required": [
+      "vault"
+    ]
+  },
+  "deliverable": "Harvest + rebalance run on schedule with a per-cycle operations log.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

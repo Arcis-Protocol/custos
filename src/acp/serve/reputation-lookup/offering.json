@@ -1,0 +1,23 @@
+{
+  "name": "Reputation Tier Lookup",
+  "description": "Look up an agent's ERC-8004 reputation tier and the AgentCredit terms it unlocks — collateral ratio and rate discount.",
+  "priceType": "fixed",
+  "priceValue": 0.5,
+  "slaMinutes": 5,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "agent": {
+        "type": "string",
+        "description": "Agent address"
+      }
+    },
+    "required": [
+      "agent"
+    ]
+  },
+  "deliverable": "Reputation tier, collateral ratio, and indicative rate.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

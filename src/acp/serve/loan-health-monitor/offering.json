@@ -1,0 +1,23 @@
+{
+  "name": "Loan Health Monitor",
+  "description": "Ongoing monitoring of an AgentCredit loan's health factor, with a written alert if it drifts toward the liquidation threshold.",
+  "priceType": "fixed",
+  "priceValue": 2,
+  "slaMinutes": 30,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "agent": {
+        "type": "string",
+        "description": "Borrower agent address"
+      }
+    },
+    "required": [
+      "agent"
+    ]
+  },
+  "deliverable": "Health-factor report and an alert threshold set on the position.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

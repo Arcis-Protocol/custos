@@ -1,0 +1,20 @@
+{
+  "name": "Treasury Market Brief",
+  "description": "A short market read framed for treasury decisions — the USDC yield environment and relevant rates — sourced live via x402 metered data.",
+  "priceType": "fixed",
+  "priceValue": 1,
+  "slaMinutes": 15,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "topic": {
+        "type": "string",
+        "description": "Optional focus (e.g. stablecoin yields, ETH, a token)"
+      }
+    }
+  },
+  "deliverable": "A concise market brief with the treasury implication called out.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

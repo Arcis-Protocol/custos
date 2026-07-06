@@ -1,0 +1,23 @@
+{
+  "name": "Identity Registry Onboarding",
+  "description": "Walk an agent through registering in the Arcis IdentityRegistry so it can build ERC-8004 reputation and unlock better credit terms.",
+  "priceType": "fixed",
+  "priceValue": 1,
+  "slaMinutes": 20,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "agent": {
+        "type": "string",
+        "description": "Agent address to register"
+      }
+    },
+    "required": [
+      "agent"
+    ]
+  },
+  "deliverable": "Registration steps with the exact calls and what reputation unlocks.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

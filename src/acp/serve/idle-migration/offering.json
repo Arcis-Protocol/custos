@@ -1,0 +1,28 @@
+{
+  "name": "Idle-to-Productive Migration",
+  "description": "CUSTOS executes the full path: takes idle USDC, deposits it into the vault, and leaves the position credit-ready — returned as raUSDC.",
+  "priceType": "percentage",
+  "priceValue": 1,
+  "slaMinutes": 60,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "principalUsdc": {
+        "type": "number",
+        "description": "Idle USDC to migrate (escrowed to CUSTOS)"
+      },
+      "returnAddress": {
+        "type": "string",
+        "description": "Address to receive the position"
+      }
+    },
+    "required": [
+      "principalUsdc",
+      "returnAddress"
+    ]
+  },
+  "deliverable": "raUSDC position opened and made credit-ready; position id returned.",
+  "requiredFunds": true,
+  "hidden": false,
+  "private": false
+}

@@ -1,0 +1,27 @@
+{
+  "name": "Keeper Gas Sentinel",
+  "description": "Monitor a keeper wallet's ETH on Base and alert before it runs dry — so scheduled harvests and writes never stall for gas.",
+  "priceType": "fixed",
+  "priceValue": 1,
+  "slaMinutes": 15,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "keeper": {
+        "type": "string",
+        "description": "Keeper wallet to watch"
+      },
+      "floorEth": {
+        "type": "number",
+        "description": "Alert threshold in ETH"
+      }
+    },
+    "required": [
+      "keeper"
+    ]
+  },
+  "deliverable": "Gas balance read and an alert threshold set on the wallet.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

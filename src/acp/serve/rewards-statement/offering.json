@@ -1,0 +1,23 @@
+{
+  "name": "Position Rewards Statement",
+  "description": "A live statement for any Arcis depositor: net deposited, current position value, rewards earned (realized + unrealized), and APY — reconciled on-chain.",
+  "priceType": "fixed",
+  "priceValue": 0.5,
+  "slaMinutes": 5,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "address": {
+        "type": "string",
+        "description": "Depositor / agent wallet"
+      }
+    },
+    "required": [
+      "address"
+    ]
+  },
+  "deliverable": "Markdown rewards statement with live value, earnings, and a BaseScan reference.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

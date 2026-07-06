@@ -1,0 +1,27 @@
+{
+  "name": "Scheduled Treasury Digest",
+  "description": "A recurring digest of an agent's Arcis treasury: position value, rewards, credit headroom, and anything that changed since last cycle.",
+  "priceType": "fixed",
+  "priceValue": 1,
+  "slaMinutes": 30,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "agent": {
+        "type": "string",
+        "description": "Agent whose treasury to summarize"
+      },
+      "cycleDays": {
+        "type": "number",
+        "description": "Digest cadence in days"
+      }
+    },
+    "required": [
+      "agent"
+    ]
+  },
+  "deliverable": "Markdown digest with deltas since the previous cycle.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

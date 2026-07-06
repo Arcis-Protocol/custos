@@ -1,0 +1,23 @@
+{
+  "name": "Peer Treasury Benchmark",
+  "description": "Benchmark an agent's treasury posture — idle ratio, yield captured, credit usage — against comparable agents in the ecosystem.",
+  "priceType": "fixed",
+  "priceValue": 1,
+  "slaMinutes": 20,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "agent": {
+        "type": "string",
+        "description": "Agent to benchmark"
+      }
+    },
+    "required": [
+      "agent"
+    ]
+  },
+  "deliverable": "Benchmark table showing where the agent leads and lags peers.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

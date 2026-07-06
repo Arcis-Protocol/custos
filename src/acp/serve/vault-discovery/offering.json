@@ -1,0 +1,20 @@
+{
+  "name": "Agent-Token Vault Discovery",
+  "description": "Discover and evaluate agent-token vaults from the Arcis factory registry — symbol, asset, TVL, and status — for a token you name.",
+  "priceType": "fixed",
+  "priceValue": 0.5,
+  "slaMinutes": 10,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "token": {
+        "type": "string",
+        "description": "Agent token symbol or address (omit to list all)"
+      }
+    }
+  },
+  "deliverable": "Matching vaults with TVL, asset, and status from the registry.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

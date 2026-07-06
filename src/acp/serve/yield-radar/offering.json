@@ -1,0 +1,15 @@
+{
+  "name": "Stablecoin Yield Radar",
+  "description": "A current read on the on-chain USDC yield landscape with Arcis positioned against it — where idle stablecoins earn most, net of risk.",
+  "priceType": "fixed",
+  "priceValue": 1,
+  "slaMinutes": 20,
+  "requirements": {
+    "type": "object",
+    "properties": {}
+  },
+  "deliverable": "Ranked USDC yield venues with Arcis's live rate in context.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

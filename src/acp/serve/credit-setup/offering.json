@@ -1,0 +1,27 @@
+{
+  "name": "Credit Line Setup",
+  "description": "A step-by-step walkthrough to open a credit line against an Arcis position through AgentCredit, sized to the agent's reputation tier.",
+  "priceType": "fixed",
+  "priceValue": 2,
+  "slaMinutes": 30,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "agent": {
+        "type": "string",
+        "description": "Agent address"
+      },
+      "positionUsdc": {
+        "type": "number",
+        "description": "Collateral position value"
+      }
+    },
+    "required": [
+      "agent"
+    ]
+  },
+  "deliverable": "Ordered setup steps with the exact calls and expected terms.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

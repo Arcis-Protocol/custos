@@ -1,0 +1,27 @@
+{
+  "name": "Treasury Strategy Session",
+  "description": "A tailored strategy for an agent's whole capital position — yield, credit, and bonds — mapped to its cash flow and risk tolerance.",
+  "priceType": "fixed",
+  "priceValue": 10,
+  "slaMinutes": 120,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "agent": {
+        "type": "string",
+        "description": "Agent address"
+      },
+      "goals": {
+        "type": "string",
+        "description": "What the agent is optimizing for"
+      }
+    },
+    "required": [
+      "agent"
+    ]
+  },
+  "deliverable": "A written treasury strategy with a sequenced action plan.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

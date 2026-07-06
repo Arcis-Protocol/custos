@@ -1,0 +1,23 @@
+{
+  "name": "Revenue Bond Health Check",
+  "description": "Assess a live revenue bond's servicing status and default risk — escrow balance, coupon coverage, and time to maturity.",
+  "priceType": "fixed",
+  "priceValue": 1,
+  "slaMinutes": 15,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "bondId": {
+        "type": "string",
+        "description": "Bond id or address"
+      }
+    },
+    "required": [
+      "bondId"
+    ]
+  },
+  "deliverable": "Servicing status, coverage ratio, and a risk verdict.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

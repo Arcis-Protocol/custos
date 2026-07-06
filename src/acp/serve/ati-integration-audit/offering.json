@@ -1,0 +1,27 @@
+{
+  "name": "ATI Integration Audit",
+  "description": "Review an agent's existing treasury integration against the ATI standard — correctness, approval safety, and withdrawal handling — with fixes.",
+  "priceType": "fixed",
+  "priceValue": 3,
+  "slaMinutes": 45,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "repo": {
+        "type": "string",
+        "description": "Repo or code reference to review"
+      },
+      "framework": {
+        "type": "string",
+        "description": "Framework / runtime"
+      }
+    },
+    "required": [
+      "framework"
+    ]
+  },
+  "deliverable": "Audit notes with prioritized fixes and corrected snippets.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

@@ -1,0 +1,23 @@
+{
+  "name": "Bond Investor Brief",
+  "description": "For an agent considering buying a revenue bond: yield to maturity, issuer reputation, coverage, and the downside if the issuer misses.",
+  "priceType": "fixed",
+  "priceValue": 1,
+  "slaMinutes": 15,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "bondId": {
+        "type": "string",
+        "description": "Bond id or address"
+      }
+    },
+    "required": [
+      "bondId"
+    ]
+  },
+  "deliverable": "Investment brief with YTM, coverage, and risk framing.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

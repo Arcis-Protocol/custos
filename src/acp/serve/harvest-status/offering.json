@@ -1,0 +1,20 @@
+{
+  "name": "Harvest & Accrual Status",
+  "description": "When the vault last harvested, how much yield is accrued-but-unrealized in strategies right now, and a depositor's share of it.",
+  "priceType": "fixed",
+  "priceValue": 0.25,
+  "slaMinutes": 5,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "address": {
+        "type": "string",
+        "description": "Optional depositor to attribute pending yield to"
+      }
+    }
+  },
+  "deliverable": "Last-harvest time, pending unrealized yield, and a next-harvest note.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

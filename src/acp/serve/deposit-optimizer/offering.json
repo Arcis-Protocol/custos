@@ -1,0 +1,31 @@
+{
+  "name": "Deposit Optimizer",
+  "description": "Given idle USDC, a spend horizon, and liquidity needs, CUSTOS returns how much to deposit versus keep liquid — maximum yield without stranding capital.",
+  "priceType": "fixed",
+  "priceValue": 1,
+  "slaMinutes": 10,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "idleUsdc": {
+        "type": "number",
+        "description": "Idle USDC available"
+      },
+      "horizonDays": {
+        "type": "number",
+        "description": "When funds may be needed"
+      },
+      "minLiquidUsdc": {
+        "type": "number",
+        "description": "USDC to always keep liquid"
+      }
+    },
+    "required": [
+      "idleUsdc"
+    ]
+  },
+  "deliverable": "Recommended deposit split, projected yield, and a reserve buffer.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}
