@@ -18,6 +18,15 @@ import { client, ADDR, VAULT_ABI, EXPLORER, getVaultAPY } from "../config.js";
 const MONEY_ACTION = /\b(deposit|withdraw|borrow|repay|transfer|send|pay|stake|redeem|move)\b/i;
 const HAS_TARGET = /(\d|\$|\busdc\b|\bmy\b|\bfor me\b)/i;
 
+// Phase 2: deposits (only) get a non-custodial signing link. Still no keys held here.
+const PHASE2 = /^(1|true|yes|on)$/i.test(process.env.PHASE2_DEPOSIT_LINKS || "");
+function depositLink(q: string): string {
+  const m = q.match(/(\d[\d,]*(?:\.\d+)?)/);
+  const amt = m ? m[1].replace(/,/g, "") : "";
+  const url = amt ? `https://arcis.money/deposit?amount=${amt}` : "https://arcis.money/deposit";
+  return `${amt ? `To deposit ${amt} USDC` : "To deposit"} into the Arcis vault, tap this and sign in your own wallet — I never touch your keys:\n${url}`;
+}
+
 async function vaultSnapshot(): Promise<string> {
   try {
     const [ta, apy] = await Promise.all([
@@ -59,6 +68,9 @@ function depositHowTo(): string {
 export async function answerReadOnly(text: string): Promise<string> {
   const q = (text || "").trim();
   if (!q) return ABOUT;
+
+  // ── PHASE 2 (when enabled): a deposit becomes a non-custodial signing link. ──
+  if (PHASE2 && /\bdeposit\b/i.test(q)) return depositLink(q);
 
   // ── HARD PHASE-1 WALL: an actual money instruction is refused, clearly. ──
   if (MONEY_ACTION.test(q) && HAS_TARGET.test(q)) return CANNOT_MOVE;

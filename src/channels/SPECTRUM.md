@@ -16,10 +16,17 @@ signature." All behavior + the money guardrail live in `channels/spectrum-brain.
 - **Go live on iMessage:** create a project at app.photon.codes (managed iMessage
   lines), set `PROJECT_ID` + `PROJECT_SECRET` and `SPECTRUM_IMESSAGE=true`; the iMessage provider turns on
 
-## Phase 2 — non-custodial deposit (next)
+## Phase 2 — non-custodial deposit (SHIPPED, flag-gated)
+
+Set `PHASE2_DEPOSIT_LINKS=true`. Then "deposit 500" replies with a signing link
+(arcis.money/deposit?amount=500). You tap it, connect your own wallet, and sign the
+approve + deposit — CUSTOS never touches your keys. Withdraw/borrow still refuse.
+
+<details><summary>original plan</summary>
 Text "deposit 500" → CUSTOS replies with a signing link / iMessage mini-app → you
 sign in **your own** wallet → the deposit lands → CUSTOS confirms with a BaseScan
 link. CUSTOS never touches your keys. The "text to deposit" demo, done safely.
+</details>
 
 ## Phase 3 — session-key delegation (later)
 Grant CUSTOS a smart-account **session key** scoped to only the Arcis vault, with a
