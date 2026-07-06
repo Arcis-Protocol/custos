@@ -12,6 +12,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 import { client, ADDR, VAULT_ABI, EXPLORER, getVaultAPY } from "../config.js";
+import { getMarketContext } from "../skills/market-context.js";
 
 // Money VERB + an amount/possessive ⇒ the user is asking us to DO something. Refuse (Phase 1).
 const MONEY_ACTION = /\b(deposit|withdraw|borrow|repay|transfer|send|pay|stake|redeem|move)\b/i;
@@ -124,6 +125,13 @@ export async function answerReadOnly(text: string): Promise<string> {
   if (/\b(\$?custos token|token|ticker|\$custos)\b/.test(l)) return TOKEN;
   if (/\b(withdraw|redeem|take out|cash out|get my)\b/.test(l)) return WITHDRAW_INFO;
   if (/\b(contract|address|deployed|basescan|on-?chain|verify)\b/.test(l)) return CONTRACTS;
+  if (/\b(market|btc|eth|bitcoin|ethereum|regime|macro|market conditions|how'?s the market)\b/.test(l)) {
+    const ctx = await getMarketContext();
+    if (!ctx.enabled)
+      return "Market context comes online when CUSTOS's CoinMarketCap x402 feed is switched on \u2014 I pay for live data on-chain in USDC from my own wallet. For now, ask me the vault's APY or TVL, or how Arcis works.";
+    if (ctx.error) return "I couldn't reach the market feed just now \u2014 try again in a moment.";
+    return ctx.summary!;
+  }
   if (/\b(offering|service|hire|price|cost|sell|acp|buy from)\b/.test(l)) return OFFERINGS;
   if (/\b(how do i|how to|get started|onboard|use it|deposit)\b/.test(l)) return depositHowTo();
   if (/\b(hi|hey|hello|gm|yo|sup|hola)\b/.test(l)) return `${ABOUT}\n\nAsk me the vault's APY or TVL, how credit works, or how to deposit. Say \u201chelp\u201d for more.`;

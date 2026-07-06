@@ -6,13 +6,15 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "tsx src/index.ts",
-    "build": "tsup src/index.ts --format esm --clean --external spectrum-ts",
+    "build": "tsup src/index.ts --format esm --clean --external spectrum-ts --external @x402/axios --external @x402/evm --external axios",
     "acp": "tsx src/acp/provider.ts",
     "acp:offerings": "tsx src/acp/emit-offerings.ts",
     "graduator": "tsx src/graduator/index.ts",
     "spectrum": "tsx --env-file-if-exists=.env src/spectrum-server.ts"
   },
   "dependencies": {
+    "@x402/axios": "^2.17.0",
+    "@x402/evm": "^2.17.0",
     "viem": "^2.21.0"
   },
   "devDependencies": {
