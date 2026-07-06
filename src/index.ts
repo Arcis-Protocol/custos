@@ -172,6 +172,14 @@ async function main() {
     setInterval(() => xSkill.run(), X_INT);
   }, 300_000);
 
+  // iMessage / Spectrum — optional, in-process, env-gated.
+  // On Railway: set SPECTRUM_IMESSAGE=true + PROJECT_ID + PROJECT_SECRET to go live on iMessage.
+  if (process.env.SPECTRUM_IMESSAGE === "true") {
+    import("./channels/spectrum-runtime.js")
+      .then(({ startSpectrum }) => { console.log("  CUSTOS on iMessage (Spectrum) — starting."); return startSpectrum(); })
+      .catch((e) => console.error("[CUSTOS] Spectrum failed to start (iMessage off, keeper continues):", e?.message || e));
+  }
+
   await alert(`CUSTOS online. 18 skills active.\nMode: ${hasWriteAccess() ? "KEEPER" : "MONITOR"}\nTelegram: ${tg} | X: ${xm}`, "INFO");
 
   console.log("  Custos is watching.\n");

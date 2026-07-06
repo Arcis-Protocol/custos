@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "tsx src/index.ts",
-    "build": "tsup src/index.ts --format esm --clean",
+    "build": "tsup src/index.ts --format esm --clean --external spectrum-ts",
     "acp": "tsx src/acp/provider.ts",
     "acp:offerings": "tsx src/acp/emit-offerings.ts",
     "graduator": "tsx src/graduator/index.ts",
