@@ -102,7 +102,82 @@ export const VAULT_SNAPSHOT_RESOURCE = {
   params: { type: "object", properties: {} },
 };
 
-export const OFFERINGS: Offering[] = [TREASURY_REPORT, TREASURY_MANAGEMENT, TREASURY_CLOSE];
+// ── New service-only offerings (fundTransfer: false — pure work, no principal moved) ──
+
+export const IDLE_CHECK: Offering = {
+  id: "idle-check",
+  name: "Idle-USDC Treasury Check",
+  description: "Free discovery: point CUSTOS at any wallet or agent and get a one-line read on its idle USDC and what Arcis could do with it. The front door to the citadel.",
+  priceType: "fixed", priceValue: 0, slaMinutes: 5,
+  requirements: { type: "object", properties: { walletAddress: { type: "string", description: "Wallet/agent to check" } }, required: ["walletAddress"] },
+  deliverable: "One-line idle-capital read + suggested next step.",
+  fundTransfer: false,
+};
+
+export const VAULT_YIELD_SNAPSHOT: Offering = {
+  id: "vault-yield-snapshot",
+  name: "Vault Yield Snapshot",
+  description: "A point-in-time snapshot of the Arcis raUSDC vault: live APY, TVL, utilization, reserve ratio, and Aave source rate — verifiable on-chain.",
+  priceType: "fixed", priceValue: 0.5, slaMinutes: 5,
+  requirements: { type: "object", properties: {} },
+  deliverable: "Markdown snapshot of live vault economics with a BaseScan link.",
+  fundTransfer: false,
+};
+
+export const ATI_EXPLAINER: Offering = {
+  id: "ati-explainer",
+  name: "ATI Explainer (ELI5)",
+  description: "A plain-language brief on one Arcis primitive — Agent Vaults, Agent Credit, or Revenue Bonds — written for another agent (or its operator) to understand and act on.",
+  priceType: "fixed", priceValue: 0.25, slaMinutes: 15,
+  requirements: { type: "object", properties: { topic: { type: "string", enum: ["vaults", "credit", "bonds", "ati"], description: "Which primitive to explain" } }, required: ["topic"] },
+  deliverable: "One-page markdown explainer citing the ATI as an open standard.",
+  fundTransfer: false,
+};
+
+export const CREDIT_ESTIMATE: Offering = {
+  id: "credit-estimate",
+  name: "Credit-Capacity Estimate",
+  description: "Given a vault position, CUSTOS estimates the USDC credit line it could unlock through AgentCredit at current reputation-tier rates — without selling the position.",
+  priceType: "fixed", priceValue: 1.0, slaMinutes: 10,
+  requirements: { type: "object", properties: { positionUsdc: { type: "number", description: "raUSDC position value" }, agent: { type: "string", description: "Agent address for reputation lookup" } }, required: ["positionUsdc"] },
+  deliverable: "Estimated credit line, collateral ratio, and indicative rate.",
+  fundTransfer: false,
+};
+
+export const TVL_MILESTONE: Offering = {
+  id: "tvl-milestone",
+  name: "Vault-TVL Milestone Report",
+  description: "A scheduled, verifiable report of the Arcis vault's TVL and growth — pulled on-chain and formatted for proof-before-post. The Watcher's offering.",
+  priceType: "fixed", priceValue: 0.5, slaMinutes: 10,
+  requirements: { type: "object", properties: { sinceTvl: { type: "number", description: "Baseline TVL to measure growth from (optional)" } } },
+  deliverable: "TVL + growth report with an on-chain reference.",
+  fundTransfer: false,
+};
+
+export const TREASURY_AUDIT: Offering = {
+  id: "treasury-audit",
+  name: "Agent Treasury Audit",
+  description: "A deeper review of an agent's on-chain balances: idle vs. productive capital, yield left on the table, credit capacity unused, and a prioritized route into Arcis.",
+  priceType: "fixed", priceValue: 2.0, slaMinutes: 30,
+  requirements: { type: "object", properties: { agent: { type: "string", description: "Agent/wallet to audit" }, chain: { type: "string", description: "Chain (default base)" } }, required: ["agent"] },
+  deliverable: "Markdown treasury audit with prioritized recommendations.",
+  fundTransfer: false,
+};
+
+export const INTEGRATION_WALKTHROUGH: Offering = {
+  id: "integration-walkthrough",
+  name: "Integration Walkthrough",
+  description: "A tailored walkthrough for wiring an agent's treasury into Arcis via the ATI — SDK, MCP, CLI, or a framework plugin — with copy-paste code for the caller's stack.",
+  priceType: "fixed", priceValue: 5.0, slaMinutes: 60,
+  requirements: { type: "object", properties: { framework: { type: "string", description: "Agent framework/runtime (e.g. eliza, langchain, mcp, viem)" } }, required: ["framework"] },
+  deliverable: "Step-by-step integration guide with runnable code for the named framework.",
+  fundTransfer: false,
+};
+
+export const OFFERINGS: Offering[] = [
+  IDLE_CHECK, TREASURY_REPORT, VAULT_YIELD_SNAPSHOT, ATI_EXPLAINER, CREDIT_ESTIMATE,
+  TVL_MILESTONE, TREASURY_AUDIT, INTEGRATION_WALKTHROUGH, TREASURY_MANAGEMENT, TREASURY_CLOSE,
+];
 
 /** Serialize an offering to the JSON shape `acp offering create --from-file` expects. */
 export function toOfferingJson(o: Offering) {

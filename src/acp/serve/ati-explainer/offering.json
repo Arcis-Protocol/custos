@@ -1,0 +1,29 @@
+{
+  "name": "ATI Explainer (ELI5)",
+  "description": "A plain-language brief on one Arcis primitive — Agent Vaults, Agent Credit, or Revenue Bonds — written for another agent (or its operator) to understand and act on.",
+  "priceType": "fixed",
+  "priceValue": 0.25,
+  "slaMinutes": 15,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "topic": {
+        "type": "string",
+        "enum": [
+          "vaults",
+          "credit",
+          "bonds",
+          "ati"
+        ],
+        "description": "Which primitive to explain"
+      }
+    },
+    "required": [
+      "topic"
+    ]
+  },
+  "deliverable": "One-page markdown explainer citing the ATI as an open standard.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

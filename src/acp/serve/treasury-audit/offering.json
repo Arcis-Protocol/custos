@@ -1,0 +1,27 @@
+{
+  "name": "Agent Treasury Audit",
+  "description": "A deeper review of an agent's on-chain balances: idle vs. productive capital, yield left on the table, credit capacity unused, and a prioritized route into Arcis.",
+  "priceType": "fixed",
+  "priceValue": 2,
+  "slaMinutes": 30,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "agent": {
+        "type": "string",
+        "description": "Agent/wallet to audit"
+      },
+      "chain": {
+        "type": "string",
+        "description": "Chain (default base)"
+      }
+    },
+    "required": [
+      "agent"
+    ]
+  },
+  "deliverable": "Markdown treasury audit with prioritized recommendations.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

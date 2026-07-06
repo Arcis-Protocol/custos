@@ -1,0 +1,23 @@
+{
+  "name": "Integration Walkthrough",
+  "description": "A tailored walkthrough for wiring an agent's treasury into Arcis via the ATI — SDK, MCP, CLI, or a framework plugin — with copy-paste code for the caller's stack.",
+  "priceType": "fixed",
+  "priceValue": 5,
+  "slaMinutes": 60,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "framework": {
+        "type": "string",
+        "description": "Agent framework/runtime (e.g. eliza, langchain, mcp, viem)"
+      }
+    },
+    "required": [
+      "framework"
+    ]
+  },
+  "deliverable": "Step-by-step integration guide with runnable code for the named framework.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

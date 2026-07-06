@@ -1,0 +1,15 @@
+{
+  "name": "Vault Yield Snapshot",
+  "description": "A point-in-time snapshot of the Arcis raUSDC vault: live APY, TVL, utilization, reserve ratio, and Aave source rate — verifiable on-chain.",
+  "priceType": "fixed",
+  "priceValue": 0.5,
+  "slaMinutes": 5,
+  "requirements": {
+    "type": "object",
+    "properties": {}
+  },
+  "deliverable": "Markdown snapshot of live vault economics with a BaseScan link.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

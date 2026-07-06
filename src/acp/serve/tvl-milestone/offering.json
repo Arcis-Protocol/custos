@@ -1,0 +1,20 @@
+{
+  "name": "Vault-TVL Milestone Report",
+  "description": "A scheduled, verifiable report of the Arcis vault's TVL and growth — pulled on-chain and formatted for proof-before-post. The Watcher's offering.",
+  "priceType": "fixed",
+  "priceValue": 0.5,
+  "slaMinutes": 10,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "sinceTvl": {
+        "type": "number",
+        "description": "Baseline TVL to measure growth from (optional)"
+      }
+    }
+  },
+  "deliverable": "TVL + growth report with an on-chain reference.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

@@ -1,0 +1,27 @@
+{
+  "name": "Credit-Capacity Estimate",
+  "description": "Given a vault position, CUSTOS estimates the USDC credit line it could unlock through AgentCredit at current reputation-tier rates — without selling the position.",
+  "priceType": "fixed",
+  "priceValue": 1,
+  "slaMinutes": 10,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "positionUsdc": {
+        "type": "number",
+        "description": "raUSDC position value"
+      },
+      "agent": {
+        "type": "string",
+        "description": "Agent address for reputation lookup"
+      }
+    },
+    "required": [
+      "positionUsdc"
+    ]
+  },
+  "deliverable": "Estimated credit line, collateral ratio, and indicative rate.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

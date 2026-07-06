@@ -1,0 +1,23 @@
+{
+  "name": "Idle-USDC Treasury Check",
+  "description": "Free discovery: point CUSTOS at any wallet or agent and get a one-line read on its idle USDC and what Arcis could do with it. The front door to the citadel.",
+  "priceType": "fixed",
+  "priceValue": 0,
+  "slaMinutes": 5,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "walletAddress": {
+        "type": "string",
+        "description": "Wallet/agent to check"
+      }
+    },
+    "required": [
+      "walletAddress"
+    ]
+  },
+  "deliverable": "One-line idle-capital read + suggested next step.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}
