@@ -10,7 +10,8 @@
     "acp": "tsx src/acp/provider.ts",
     "acp:offerings": "tsx src/acp/emit-offerings.ts",
     "graduator": "tsx src/graduator/index.ts",
-    "spectrum": "tsx --env-file-if-exists=.env src/spectrum-server.ts"
+    "spectrum": "tsx --env-file-if-exists=.env src/spectrum-server.ts",
+    "acp:register": "bash scripts/register-offerings.sh"
   },
   "dependencies": {
     "@x402/axios": "^2.17.0",
