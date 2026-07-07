@@ -1,0 +1,27 @@
+{
+  "name": "Fiat On-Ramp (USD → USDC)",
+  "description": "CUSTOS prepares a fiat-to-USDC on-ramp with a licensed provider — you complete KYC and payment, USDC lands in your own wallet on Base, ready to deploy. Quote shown first.",
+  "priceType": "fixed",
+  "priceValue": 0.5,
+  "slaMinutes": 10,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "wallet": {
+        "type": "string",
+        "description": "Destination wallet"
+      },
+      "amountUsd": {
+        "type": "number",
+        "description": "USD to convert"
+      }
+    },
+    "required": [
+      "wallet"
+    ]
+  },
+  "deliverable": "A ready on-ramp checkout link with an estimated quote.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

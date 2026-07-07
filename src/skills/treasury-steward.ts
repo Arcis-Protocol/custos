@@ -18,6 +18,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { client, ADDR, VAULT_ABI, alert } from "../config.js";
 import type { Skill, SkillStats } from "../config.js";
+import { treasuryReview } from "./treasury-stack.js";
 
 const MCP_BASE = process.env.MCP_BASE || "https://mcp.arcis.money";
 const STORE = process.env.STEWARD_STORE || "data/steward-subscribers.json";
@@ -148,10 +149,18 @@ export class TreasurySteward implements Skill {
     sub.lastCycle = Date.now();
     sub.cyclesRun++;
 
+    // 5) Coordinated treasury review — the eight-part stack
+    try {
+      const review = await treasuryReview(sub.agent);
+      const risks = review.findings.filter((f) => f.severity === "risk").length;
+      const acts = review.findings.filter((f) => f.severity === "action").length;
+      L.push(`Treasury review: ${review.findings.length} findings · ${risks} risk · ${acts} action.`);
+      for (const g of review.gates) L.push(`  ⚠ ${g}`);
+      for (const a of review.actions.slice(0, 4)) L.push(`  ◆ ${a}`);
+    } catch {}
+
     return L;
   }
-
-  // ── Reads ────────────────────────────────────────────────────────────────
   private async protocolCtx(): Promise<ProtocolCtx> {
     try {
       const [reserve, total, paused] = await Promise.all([

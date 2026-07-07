@@ -1,6 +1,6 @@
 {
   "name": "Managed Treasury — CUSTOS Steward",
-  "description": "CUSTOS runs your entire treasury, autonomously — every treasury service in one subscription: idle-capital deployment, yield capture and live reward tracking, credit-headroom management, liquidity and reserve guarding, and continuous risk monitoring, with a digest every cycle. One line, the whole stack. Billed monthly in USDC; cancel anytime.",
+  "description": "CUSTOS runs your entire treasury, autonomously — the eight-part stack in one subscription: stablecoin visibility, a 13-week + 12-month forecast, reconciliation, liquidity optimization, anomaly & risk, FX exposure, and controlled payments — coordinated with control gates, plus fiat on/off ramps, idle-capital deployment, yield capture, and credit management. A coordinated review every cycle. Billed monthly in USDC; cancel anytime.",
   "priceType": "fixed",
   "priceValue": 250,
   "slaMinutes": 60,

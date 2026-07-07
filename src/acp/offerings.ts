@@ -455,7 +455,7 @@ export const MANAGED_TREASURY: Offering = {
   id: "managed-treasury",
   name: "Managed Treasury — CUSTOS Steward",
   description:
-    "CUSTOS runs your entire treasury, autonomously — every treasury service in one subscription: idle-capital deployment, yield capture and live reward tracking, credit-headroom management, liquidity and reserve guarding, and continuous risk monitoring, with a digest every cycle. One line, the whole stack. Billed monthly in USDC; cancel anytime.",
+    "CUSTOS runs your entire treasury, autonomously — the eight-part stack in one subscription: stablecoin visibility, a 13-week + 12-month forecast, reconciliation, liquidity optimization, anomaly & risk, FX exposure, and controlled payments — coordinated with control gates, plus fiat on/off ramps, idle-capital deployment, yield capture, and credit management. A coordinated review every cycle. Billed monthly in USDC; cancel anytime.",
   priceType: "fixed",
   priceValue: 250,            // USDC / month — flagship subscription
   slaMinutes: 60,             // onboarding SLA; management is continuous thereafter
@@ -476,9 +476,37 @@ export const MANAGED_TREASURY: Offering = {
   fundTransfer: false,        // a management fee — principal stays in the client's control / managed in place
 };
 
+export const ONRAMP: Offering = {
+  id: "onramp",
+  name: "Fiat On-Ramp (USD → USDC)",
+  description: "CUSTOS prepares a fiat-to-USDC on-ramp with a licensed provider — you complete KYC and payment, USDC lands in your own wallet on Base, ready to deploy. Quote shown first.",
+  priceType: "fixed", priceValue: 0.5, slaMinutes: 10,
+  requirements: { type: "object", properties: { wallet: { type: "string", description: "Destination wallet" }, amountUsd: { type: "number", description: "USD to convert" } }, required: ["wallet"] },
+  deliverable: "A ready on-ramp checkout link with an estimated quote.",
+  fundTransfer: false,
+};
+export const OFFRAMP: Offering = {
+  id: "offramp",
+  name: "Fiat Off-Ramp (USDC → USD)",
+  description: "CUSTOS prepares a USDC-to-fiat off-ramp with a licensed provider — sell USDC from your own wallet, receive fiat to your bank, quote and payout terms shown first.",
+  priceType: "fixed", priceValue: 0.5, slaMinutes: 10,
+  requirements: { type: "object", properties: { wallet: { type: "string", description: "Source wallet" }, amountUsdc: { type: "number", description: "USDC to sell" }, payoutCcy: { type: "string", description: "Payout currency (default USD)" } }, required: ["wallet"] },
+  deliverable: "A ready off-ramp session with an estimated quote and payout link.",
+  fundTransfer: false,
+};
+export const TREASURY_REVIEW: Offering = {
+  id: "treasury-review",
+  name: "Coordinated Treasury Review",
+  description: "The full eight-part read: stablecoin visibility, 13-week + 12-month forecast, reconciliation, liquidity optimization, anomaly & risk, FX exposure, and payments — coordinated with control gates so one workflow can't create a control issue in another.",
+  priceType: "fixed", priceValue: 3, slaMinutes: 30,
+  requirements: { type: "object", properties: { agent: { type: "string", description: "Treasury wallet to review" } }, required: ["agent"] },
+  deliverable: "A coordinated treasury review: findings by capability, control gates, and ready actions.",
+  fundTransfer: false,
+};
+
 export const OFFERINGS: Offering[] = [
   // ── Flagship subscription — the whole stack, managed ──
-  MANAGED_TREASURY,
+  MANAGED_TREASURY, TREASURY_REVIEW, ONRAMP, OFFRAMP,
   // ── Core (the original wedge + flagship) ──
   IDLE_CHECK, TREASURY_REPORT, VAULT_YIELD_SNAPSHOT, ATI_EXPLAINER, CREDIT_ESTIMATE,
   TVL_MILESTONE, TREASURY_AUDIT, INTEGRATION_WALKTHROUGH, TREASURY_MANAGEMENT, TREASURY_CLOSE,

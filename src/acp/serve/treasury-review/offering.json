@@ -1,0 +1,23 @@
+{
+  "name": "Coordinated Treasury Review",
+  "description": "The full eight-part read: stablecoin visibility, 13-week + 12-month forecast, reconciliation, liquidity optimization, anomaly & risk, FX exposure, and payments — coordinated with control gates so one workflow can't create a control issue in another.",
+  "priceType": "fixed",
+  "priceValue": 3,
+  "slaMinutes": 30,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "agent": {
+        "type": "string",
+        "description": "Treasury wallet to review"
+      }
+    },
+    "required": [
+      "agent"
+    ]
+  },
+  "deliverable": "A coordinated treasury review: findings by capability, control gates, and ready actions.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}

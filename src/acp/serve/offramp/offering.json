@@ -1,0 +1,31 @@
+{
+  "name": "Fiat Off-Ramp (USDC → USD)",
+  "description": "CUSTOS prepares a USDC-to-fiat off-ramp with a licensed provider — sell USDC from your own wallet, receive fiat to your bank, quote and payout terms shown first.",
+  "priceType": "fixed",
+  "priceValue": 0.5,
+  "slaMinutes": 10,
+  "requirements": {
+    "type": "object",
+    "properties": {
+      "wallet": {
+        "type": "string",
+        "description": "Source wallet"
+      },
+      "amountUsdc": {
+        "type": "number",
+        "description": "USDC to sell"
+      },
+      "payoutCcy": {
+        "type": "string",
+        "description": "Payout currency (default USD)"
+      }
+    },
+    "required": [
+      "wallet"
+    ]
+  },
+  "deliverable": "A ready off-ramp session with an estimated quote and payout link.",
+  "requiredFunds": false,
+  "hidden": false,
+  "private": false
+}
