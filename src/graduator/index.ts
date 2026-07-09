@@ -47,10 +47,7 @@ async function takeExit(p: book.Position, cs: CurveState, reason: string, valueV
 
 export async function runCycle() {
   if (!G.enabled) return;
-  if (BONDING === "0x0000000000000000000000000000000000000000") {
-    await alert("Graduator: VIRTUALS_BONDING_ADDRESS unset — cannot read curves. Halting cycle.", "WARN");
-    return;
-  }
+  if (BONDING === "0x0000000000000000000000000000000000000000") return; // misconfig surfaced once in main(); stay silent per-cycle
 
   const candidates = await fetchPrototypes();
   const csCache = new Map<string, CurveState | null>();
@@ -102,7 +99,12 @@ async function main() {
   Entry window: ${G.entryMinProgressPct}–${G.entryMaxProgressPct}%   Target ${G.targetMultiple}x  Stop -${G.stopLossPct}%  Exit@ ${G.exitAtProgressPct}%
   Scan every ${Math.round(G.intervalMs / 1000)}s
   `);
-  if (!G.enabled) { console.log("  GRADUATOR_ENABLED=false — idle. Set it to run.\n"); }
+  if (!G.enabled) { console.log("  GRADUATOR_ENABLED=false — idle. Set it to run.\n"); return; }
+  if (BONDING === "0x0000000000000000000000000000000000000000") {
+    console.log("  VIRTUALS_BONDING_ADDRESS unset — idling (set it and restart to run).\n");
+    await alert("The Graduator is enabled but VIRTUALS_BONDING_ADDRESS is unset — it can't read curves, so it's idling (no scan loop). Set the address and restart to run it, or set GRADUATOR_ENABLED=false to silence it.", "WARN").catch(() => {});
+    return;
+  }
   await alert(`The Graduator online — ${modeLabel()}. Scanning the curve.`, "INFO").catch(() => {});
   await runCycle().catch(e => console.error("cycle error:", e));
   setInterval(() => runCycle().catch(e => console.error("cycle error:", e)), G.intervalMs);
