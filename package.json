@@ -12,7 +12,9 @@
     "graduator": "tsx src/graduator/index.ts",
     "spectrum": "tsx --env-file-if-exists=.env src/spectrum-server.ts",
     "acp:register": "bash scripts/register-offerings.sh",
-    "prospect": "tsx src/prospector/index.ts"
+    "prospect": "tsx src/prospector/index.ts",
+    "outreach": "tsx src/outreach/index.ts",
+    "campaign": "npm run prospect && npm run outreach"
   },
   "dependencies": {
     "@x402/axios": "^2.17.0",
