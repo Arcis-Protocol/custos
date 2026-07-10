@@ -17,30 +17,49 @@ import { client, ADDR } from "../config.js";
 
 const VIRTUALS_API = process.env.VIRTUALS_API || "https://api.virtuals.io/api/virtuals";
 const MCP_BASE = process.env.MCP_BASE || "https://mcp.arcis.money";
-const PAGES = Number(process.env.PROSPECT_PAGES || 5);
+const PAGES = Number(process.env.PROSPECT_PAGES || 0);          // 0 = scan ALL available pages
+const MAX_PAGES = Number(process.env.PROSPECT_MAX_PAGES || 60); // safety cap
 const PAGE_SIZE = Number(process.env.PROSPECT_PAGE_SIZE || 100);
 const MIN_IDLE = Number(process.env.PROSPECT_MIN_IDLE || 25);   // min idle USDC to count as a prospect
+const ENRICH_TOP = Number(process.env.PROSPECT_ENRICH || 40);   // enrich this many top prospects with X handle
 const OUT_DIR = process.env.PROSPECT_OUT || ".";
 
 interface Agent { id: number; symbol: string; name: string; wallet: `0x${string}`; status: string; mcap: number; }
-interface Prospect extends Agent { idleUsdc: number; yieldPerYr: number; draft: string; }
+interface Prospect extends Agent { idleUsdc: number; yieldPerYr: number; draft: string; handle?: string; }
 
 const usd = (n: number) => `$${n.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
 
 async function fetchAgents(): Promise<Agent[]> {
   const out: Agent[] = [];
-  for (let p = 1; p <= PAGES; p++) {
+  let pageCount = MAX_PAGES;
+  const cap = () => Math.min(pageCount, MAX_PAGES, PAGES > 0 ? PAGES : Infinity);
+  for (let p = 1; p <= cap(); p++) {
     const url = `${VIRTUALS_API}?pagination%5Bpage%5D=${p}&pagination%5BpageSize%5D=${PAGE_SIZE}&filters%5Bstatus%5D=${process.env.PROSPECT_STATUS || "AVAILABLE"}&sort=mcapInVirtual%3Adesc`;
     try {
       const resp = await fetch(url, { headers: { Accept: "application/json" } });
       const j: any = await resp.json();
+      if (p === 1 && j.meta?.pagination?.pageCount) pageCount = j.meta.pagination.pageCount;
       const n = (j.data || []).length;
       for (const a of j.data || []) if (a.walletAddress) out.push({ id: a.id, symbol: a.symbol || "?", name: a.name || "?", wallet: a.walletAddress, status: a.status || "?", mcap: Number(a.mcapInVirtual) || 0 });
-      console.log(`   page ${p}: ${n} agents (${resp.status})`);
+      if (p === 1 || p % 10 === 0) console.log(`   scanning page ${p}/${cap()} — ${out.length} agents so far`);
+      if (n === 0) break;
     } catch (e: any) { console.error(`   page ${p} failed:`, e.message); }
-    await new Promise((r) => setTimeout(r, 250));
+    await new Promise((r) => setTimeout(r, 200));
   }
   return out;
+}
+
+// enrich the top prospects with their verified X handle (the reach channel)
+async function enrichTop(prospects: Prospect[], n: number) {
+  for (const p of prospects.slice(0, n)) {
+    try {
+      const j: any = await (await fetch(`${VIRTUALS_API}/${p.id}`, { headers: { Accept: "application/json" } })).json();
+      const tw = j?.data?.socials?.VERIFIED_LINKS?.TWITTER || "";
+      const m = /(?:x\.com|twitter\.com)\/(@?[A-Za-z0-9_]+)/.exec(tw);
+      if (m) p.handle = m[1].replace(/^@/, "");
+    } catch {}
+    await new Promise((r) => setTimeout(r, 120));
+  }
 }
 
 async function readIdle(agents: Agent[]): Promise<Map<string, number>> {
@@ -52,13 +71,13 @@ async function readIdle(agents: Agent[]): Promise<Map<string, number>> {
     const slice = agents.slice(i, i + B);
     const contracts = slice.map((a) => ({ address: ADDR.usdc, abi, functionName: "balanceOf" as const, args: [a.wallet] }));
     try {
-      const res = await client.multicall({ contracts, allowFailure: true, multicallAddress: MULTICALL3 });
+      const res = await (client.multicall as any)({ contracts, allowFailure: true, multicallAddress: MULTICALL3 });
       slice.forEach((a, k) => { const r: any = res[k]; if (r?.status === "success") map.set(a.wallet.toLowerCase(), Number(r.result) / 1e6); });
     } catch (e: any) {
       // fallback: individual reads (slower but robust)
       console.error("multicall failed, falling back to reads:", e.message?.slice(0, 80));
       await Promise.all(slice.map(async (a) => {
-        try { const b = (await client.readContract({ address: ADDR.usdc, abi, functionName: "balanceOf", args: [a.wallet] })) as bigint; map.set(a.wallet.toLowerCase(), Number(b) / 1e6); } catch {}
+        try { const b = (await client.readContract({ address: ADDR.usdc, abi, functionName: "balanceOf", args: [a.wallet] } as any)) as bigint; map.set(a.wallet.toLowerCase(), Number(b) / 1e6); } catch {}
       }));
     }
   }
@@ -86,7 +105,7 @@ function draftOutreach(a: Agent, idle: number, apy: number): string {
 }
 
 async function main() {
-  console.log(`\n  CUSTOS Prospector — scanning ${PAGES * PAGE_SIZE} agents for idle treasury…\n`);
+  console.log(`\n  CUSTOS Prospector — deep-scanning all AVAILABLE agents for idle treasury…\n`);
   const agents = await fetchAgents();
   const apy = await arcisApy();
   const idle = await readIdle(agents);
@@ -96,6 +115,9 @@ async function main() {
     .filter((a) => a.idleUsdc >= MIN_IDLE)
     .map((a) => ({ ...a, yieldPerYr: a.idleUsdc * (apy / 100), draft: draftOutreach(a, a.idleUsdc, apy) }))
     .sort((x, y) => y.idleUsdc - x.idleUsdc);
+
+  console.log(`   enriching top ${Math.min(ENRICH_TOP, prospects.length)} with verified X handles…`);
+  await enrichTop(prospects, ENRICH_TOP);
 
   const totalIdle = prospects.reduce((s, p) => s + p.idleUsdc, 0);
   const totalYield = prospects.reduce((s, p) => s + p.yieldPerYr, 0);
@@ -110,9 +132,9 @@ async function main() {
     `Scanned **${agents.length}** Virtuals agents · **${prospects.length}** hold ≥ ${usd(MIN_IDLE)} idle USDC.`,
     `Total idle across prospects: **${usd(totalIdle)}** · yield left on the table at ${apy}%: **${usd(totalYield)}/yr**.`,
     ``,
-    `| # | Agent | Idle USDC | Yield left /yr | Wallet |`,
-    `|--:|---|--:|--:|---|`,
-    ...prospects.slice(0, 50).map((p, i) => `| ${i + 1} | $${p.symbol} | ${usd(p.idleUsdc)} | ${usd(p.yieldPerYr)} | \`${p.wallet}\` |`),
+    `| # | Agent | X | Idle USDC | Yield left /yr | Wallet |`,
+    `|--:|---|---|--:|--:|---|`,
+    ...prospects.slice(0, 50).map((p, i) => `| ${i + 1} | $${p.symbol} | ${p.handle ? "@" + p.handle : "—"} | ${usd(p.idleUsdc)} | ${usd(p.yieldPerYr)} | \`${p.wallet}\` |`),
     ``,
     `## Outreach drafts (top 10)`,
     ...prospects.slice(0, 10).flatMap((p) => [``, `### $${p.symbol} — ${usd(p.idleUsdc)} idle`, "```", p.draft, "```"]),

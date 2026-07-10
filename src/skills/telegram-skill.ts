@@ -28,6 +28,13 @@ export class TelegramSkill implements Skill {
 
   setTreasury(t: any) { this.treasury = t; }
 
+  private outreach: { proposeNext: Function; handleApproval: (a: string, id: string) => Promise<string> } | null = null;
+  setOutreach(o: any) { this.outreach = o; }
+  async proposeOutreach() {
+    try { if (this.outreach) await this.outreach.proposeNext((text: string, buttons: any[][]) => this.sendWithButtons(ADMIN_CHAT, text, buttons)); }
+    catch (e: any) { console.error("[TG] outreach propose error:", e.message?.slice(0, 100)); }
+  }
+
   private async send(chatId: string | number, text: string) {
     try {
       await fetch(`${API}/sendMessage`, {
@@ -196,6 +203,9 @@ export class TelegramSkill implements Skill {
       await this.answerCallback(cbQuery.id, msg.chat.id, msg.message_id,
         `*Vault Request — DECLINED*\n\nToken: \`${token}\``);
       if (requesterChat) await this.send(requesterChat, `Your vault request for \`${token}\` was reviewed but not approved at this time. Reach out if you'd like to discuss.`);
+    } else if (tag === "outreach_send" || tag === "outreach_skip") {
+      const res = this.outreach ? await this.outreach.handleApproval(tag, token) : "Outreach isn't wired.";
+      await this.answerCallback(cbQuery.id, msg.chat.id, msg.message_id, res);
     }
   }
 
