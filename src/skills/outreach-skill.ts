@@ -17,17 +17,18 @@ const PROSPECTS = process.env.OUTREACH_PROSPECTS || "prospects.json";
 const LEDGER = process.env.OUTREACH_LEDGER || "data/outreach-ledger.json";
 
 interface P { id: number; symbol: string; idleUsdc: number; yieldPerYr: number; handle?: string; }
-type Ledger = { contacted: Record<string, any>; skipped: Record<string, any> };
+type Ledger = { contacted: Record<string, any>; skipped: Record<string, any>; previewed: Record<string, any> };
 
 export class OutreachSkill {
   private x: XSkill;
-  private ledger: Ledger = { contacted: {}, skipped: {} };
+  private ledger: Ledger = { contacted: {}, skipped: {}, previewed: {} };
   private byId = new Map<string, P>();
   private pendingId: string | null = null;
 
   constructor(x: XSkill) { this.x = x; this.loadLedger(); }
 
-  private loadLedger() { try { this.ledger = JSON.parse(fs.readFileSync(LEDGER, "utf8")); } catch { this.ledger = { contacted: {}, skipped: {} }; } }
+  private loadLedger() { try { this.ledger = JSON.parse(fs.readFileSync(LEDGER, "utf8")); } catch { this.ledger = { contacted: {}, skipped: {}, previewed: {} }; } if (!this.ledger.previewed) this.ledger.previewed = {}; }
+  private isDry() { return process.env.OUTREACH_DRY_RUN === "true" || !process.env.X_API_KEY; }
   private saveLedger() { try { fs.mkdirSync("data", { recursive: true }); fs.writeFileSync(LEDGER, JSON.stringify(this.ledger, null, 2)); } catch {} }
 
   private loadProspects(): P[] {
@@ -55,14 +56,15 @@ export class OutreachSkill {
     if (process.env.OUTREACH_ENABLED !== "true") return;
     if (this.pendingId) return;
     const ps = this.loadProspects();
-    const next = ps.find((p) => !this.ledger.contacted[p.id] && !this.ledger.skipped[p.id]);
+    const dry = this.isDry();
+    const next = ps.find((p) => !this.ledger.contacted[p.id] && !this.ledger.skipped[p.id] && !(dry && this.ledger.previewed[p.id]));
     if (!next) return;
     this.pendingId = String(next.id);
-    const via = next.handle ? `X → @${next.handle}` : "no verified X handle — manual only";
+    const via = next.handle ? `X → @${next.handle}` : "⚠ no verified X handle — can't post; skip or handle manually";
     const text =
-      `🏛 *Outreach approval*\n\n` +
+      `🏛 *Outreach approval*${dry ? "  ·  🧪 DRY RUN (nothing posts)" : ""}\n\n` +
       `*$${next.symbol}* · ~$${Math.round(next.idleUsdc).toLocaleString()} idle · ~$${Math.round(next.yieldPerYr).toLocaleString()}/yr on the table\n` +
-      `Channel: ${via}\n\n_Draft:_\n${this.compose(next)}`;
+      `Channel: ${via}\n\n*Exact post${next.handle ? ` to @${next.handle}` : ""}:*\n${this.compose(next)}`;
     await sendWithButtons(text, [[
       { text: "✓ Send", callback_data: `outreach_send:${next.id}` },
       { text: "✗ Skip", callback_data: `outreach_skip:${next.id}` },
@@ -82,8 +84,14 @@ export class OutreachSkill {
       return `Skipped $${p.symbol}. Won't surface again.`;
     }
 
+    const tweet = this.compose(p);
+    if (this.isDry()) {
+      this.ledger.previewed[id] = { symbol: p.symbol, handle: p.handle || null, at: Date.now() };
+      this.saveLedger();
+      return `🧪 *DRY RUN* — would post ${p.handle ? `to @${p.handle}` : "(no handle — nothing to post)"}:\n\n${tweet}\n\n_Not sent, not marked contacted — it'll return for real once you set X creds + OUTREACH_DRY_RUN=false._`;
+    }
     let sent = false;
-    if (p.handle) { try { sent = await this.x.postProof(this.compose(p)); } catch {} }
+    if (p.handle) { try { sent = await this.x.postProof(tweet); } catch {} }
     this.ledger.contacted[id] = { symbol: p.symbol, handle: p.handle || null, at: Date.now(), sent };
     this.saveLedger();
     return sent
