@@ -21,6 +21,7 @@ import { TreasurySteward } from "./skills/treasury-steward.js";
 import { TelegramSkill } from "./skills/telegram-skill.js";
 import { XSkill } from "./skills/x-skill.js";
 import { OutreachSkill } from "./skills/outreach-skill.js";
+import { runProspector } from "./prospector/index.js";
 import { NarratorSkill } from "./skills/narrator-skill.js";
 import { InsightSkill } from "./skills/insight-skill.js";
 import { EngagementSkill } from "./skills/engagement-skill.js";
@@ -52,6 +53,7 @@ const TREASURY_INT = 1_800_000; // 30 min (agentic treasury accumulation cycle)
 const ACPROUTER_INT = 900_000;  // 15 min (route ACP-earned USDC into Arcis)
 const STEWARD_INT = 3_600_000;  // 1 hour (managed-treasury subscriber cycle)
 const OUTREACH_INT = Number(process.env.OUTREACH_INTERVAL_MS) || 1_800_000; // 30 min — propose next prospect for approval
+const PROSPECT_INT = Number(process.env.PROSPECT_INTERVAL_MS) || 21_600_000; // 6 h — refresh the ranked book (deep scan)
 
 // ── Skills ──
 const vaultKeeper = new VaultKeeper();
@@ -161,7 +163,12 @@ async function main() {
   setInterval(() => bondKeeper.run(), BOND_INT);
   setInterval(() => statusReporter.run(), STATUS_INT);
   setInterval(() => telegramSkill.run(), TELEGRAM_INT);
-  if (process.env.OUTREACH_ENABLED === "true") { console.log(`  Outreach: proposing prospects for approval every ${Math.round(OUTREACH_INT/60000)}m`); setInterval(() => telegramSkill.proposeOutreach(), OUTREACH_INT); }
+  if (process.env.OUTREACH_ENABLED === "true") {
+    console.log(`  Prospector: deep-scanning every ${Math.round(PROSPECT_INT/3600000)}h · Outreach: proposing prospects every ${Math.round(OUTREACH_INT/60000)}m`);
+    runProspector().catch((e) => console.error("prospector:", e?.message));                         // seed the book on boot
+    setInterval(() => runProspector().catch((e) => console.error("prospector:", e?.message)), PROSPECT_INT);
+    setInterval(() => telegramSkill.proposeOutreach(), OUTREACH_INT);
+  }
   setInterval(() => narratorSkill.run(), NARRATOR_INT);
   setInterval(() => insightSkill.run(), INSIGHT_INT);
   setInterval(() => engagementSkill.run(), ENGAGE_INT);

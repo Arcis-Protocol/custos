@@ -104,7 +104,7 @@ function draftOutreach(a: Agent, idle: number, apy: number): string {
   ].join("\n");
 }
 
-async function main() {
+export async function runProspector() {
   console.log(`\n  CUSTOS Prospector — deep-scanning all AVAILABLE agents for idle treasury…\n`);
   const agents = await fetchAgents();
   const apy = await arcisApy();
@@ -160,4 +160,7 @@ async function main() {
   console.log("");
 }
 
-main().catch((e) => { console.error("prospector fatal:", e); process.exit(1); });
+// Only auto-run when invoked directly (npm run prospect); safe to import elsewhere.
+if (process.argv[1] && /prospector[\\/]index/.test(process.argv[1])) {
+  runProspector().catch((e) => { console.error("prospector fatal:", e); process.exit(1); });
+}
